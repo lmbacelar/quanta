@@ -60,19 +60,6 @@ class Dimension
     multiply_or_divide :/, other
   end
 
-  def multiply_or_divide operator, other
-    return self.clone        if other.is_a? Numeric
-    raise TypeError          unless other.is_a? Dimension
-    return self.clone        if other.one?
-    other = other.reciprocal if operator == :/
-    return other.clone       if self.one?
-
-    new_dimensions = dimensions.merge(other.dimensions) do |_, pow, other_pow|
-      pow + other_pow
-    end.delete_if{ |_, pow| pow == 0 }
-    Dimension.new nil, new_dimensions
-  end
-
   def ** other
     raise TypeError unless other.is_a? Numeric
     return Dimension.one   if other ==  0 || self.one?
@@ -86,6 +73,20 @@ class Dimension
   def coerce other
     raise TypeError, "#{other.class} can't be coerced to Dimension" unless other.is_a? Numeric
     return Dimension.one, self
+  end
+
+protected
+  def multiply_or_divide operator, other
+    return self.clone        if other.is_a? Numeric
+    raise TypeError          unless other.is_a? Dimension
+    return self.clone        if other.one?
+    other = other.reciprocal if operator == :/
+    return other.clone       if self.one?
+
+    new_dimensions = dimensions.merge(other.dimensions) do |_, pow, other_pow|
+      pow + other_pow
+    end.delete_if{ |_, pow| pow == 0 }
+    Dimension.new nil, new_dimensions
   end
 
   #
