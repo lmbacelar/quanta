@@ -2,13 +2,13 @@ require_relative 'dimension'
 
 describe Dimension do
 
-  let(:length       ) { Dimension.new :length,        symbol: 'L' }
-  let(:time         ) { Dimension.new :time,          symbol: 'T' }
-  let(:area         ) { Dimension.new :area,          symbol: 'A', dimensions: { length => 2 } }
-  let(:velocity     ) { Dimension.new :velocity,      symbol: 'V', dimensions: { length => 1 , time => -1 } }
-  let(:frequency    ) { Dimension.new :frequency,     symbol: 'F', dimensions: { time => -1 } }
-  let(:radioactivity) { Dimension.new :radioactivity, symbol: 'R', dimensions: { time => -1 } }
-  let(:one          ) { Dimension.new :one,           symbol: '1', dimensions: {} }
+  let(:length       ) { Dimension.new :length,        nil,                          symbol: 'L' }
+  let(:time         ) { Dimension.new :time,          nil,                          symbol: 'T' }
+  let(:area         ) { Dimension.new :area,          { length => 2 },              symbol: 'A' }
+  let(:velocity     ) { Dimension.new :velocity,      { length => 1 , time => -1 }, symbol: 'V' }
+  let(:frequency    ) { Dimension.new :frequency,     { time => -1 },               symbol: 'F' }
+  let(:radioactivity) { Dimension.new :radioactivity, { time => -1 },               symbol: 'R' }
+  let(:one          ) { Dimension.new :one,           {},                           symbol: '1' }
     
   context 'Instance' do
     context 'Creation' do
@@ -35,7 +35,7 @@ describe Dimension do
       end
 
       it 'raises Type Error when dimensions is not a Hash' do
-        expect{ Dimension.new :length, symbol: 'L', dimensions: [] }.to raise_error
+        expect{ Dimension.new :length, [] }.to raise_error
       end
 
       it 'should be immutable' do
@@ -69,7 +69,7 @@ describe Dimension do
       it 'can compare itself to other derived dimensions' do
         other_length   = length.clone
         other_time     = time.clone
-        other_velocity = Dimension.new :velocity, symbol: 'V', dimensions: { other_length => 1, other_time => -1 } 
+        other_velocity = Dimension.new :velocity, { other_length => 1, other_time => -1 }, symbol: 'V' 
         expect(velocity).to     eq other_velocity
         expect(area    ).not_to eq other_velocity
       end
@@ -149,7 +149,7 @@ describe Dimension do
         expect(one ** 0   ).to be_equivalent_to one
       end
 
-      it 'can power itself to positive integers' do
+      it 'can power itself to negative integers' do
         expect(time ** -1).to be_equivalent_to frequency
         expect(one ** -1 ).to be_equivalent_to one
       end

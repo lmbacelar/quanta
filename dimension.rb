@@ -4,7 +4,7 @@ class Dimension
   # Instance Methods
   #
   attr_accessor :label, :name, :symbol, :dimensions
-  def initialize label = nil, name: label.to_s, symbol: label.to_s.upcase, dimensions: nil
+  def initialize label = nil, dimensions = nil, name: label.to_s, symbol: label.to_s.upcase
     raise TypeError, 'dimensions must be nil or a Hash' unless dimensions.nil? || 
                                                                dimensions.is_a?(Hash)
     @label      = label
@@ -49,7 +49,7 @@ class Dimension
   end
 
   def reciprocal
-    Dimension.new dimensions: Hash[dimensions.map{ |k, v| [k, v*-1] }]
+    Dimension.new nil, Hash[dimensions.map{ |k, v| [k, v*-1] }]
   end
 
   def * other
@@ -70,17 +70,17 @@ class Dimension
     new_dimensions = dimensions.merge(other.dimensions) do |_, pow, other_pow|
       pow + other_pow
     end.delete_if{ |_, pow| pow == 0 }
-    Dimension.new dimensions: new_dimensions
+    Dimension.new nil, new_dimensions
   end
 
   def ** other
     raise TypeError unless other.is_a? Numeric
+    return Dimension.one   if other ==  0 || self.one?
     return self.clone      if other ==  1
     return self.reciprocal if other == -1
-    return Dimension.one   if other ==  0 || self.one?
 
     new_dimensions = Hash[dimensions.map{ |dim, pow| [dim, (pow * other).to_i] }].delete_if{ |_, pow| pow == 0 }
-    Dimension.new dimensions: new_dimensions
+    Dimension.new nil, new_dimensions
   end
 
   def coerce other
@@ -92,6 +92,6 @@ class Dimension
   # Class Methods
   #
   def self.one
-    Dimension.new :one, symbol: '1', dimensions: {}
+    Dimension.new :one, {}, symbol: '1'
   end
 end
