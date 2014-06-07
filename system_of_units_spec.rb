@@ -3,14 +3,13 @@ require_relative 'system_of_units'
 describe SystemOfUnits do
 
   let(:soq) { double }
-  let(:sou) { SystemOfUnits.new(:sou, system_of_quantities: soq ) }
+  let(:sou) { SystemOfUnits.new(:sou,   system_of_quantities: soq) }
+  let(:cgs) { SystemOfUnits.new(:c_g_s, system_of_quantities: soq) }
   let(:si ) { SystemOfUnits.new(:isq, name: 'International System of Units').load_si }
 
   context 'Instance' do
     context 'Creation' do
       it 'should have a label, a name, a collection of prefixes, a collection of units and a system of quantities' do
-        soq = double
-        cgs = SystemOfUnits.new :c_g_s, system_of_quantities: soq
         expect(cgs.label               ).to eq :c_g_s
         expect(cgs.name                ).to eq 'c g s'
         expect(cgs.prefixes            ).to respond_to :each
