@@ -10,4 +10,8 @@ class Unit
     @name     = options.fetch(name) { label.to_s.tr_s '_', ' ' }
     freeze
   end
+
+  def base?
+    quantity.base? && factor == 1.0
+  end
 end

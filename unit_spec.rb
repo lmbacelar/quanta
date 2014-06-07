@@ -38,5 +38,11 @@ describe Unit do
       expect{ meter.instance_variable_set :@factor,    0 }.to raise_error
       expect{ meter.instance_variable_set :@quantity,  0 }.to raise_error
     end
+
+    context 'Inspection' do
+      it 'knows if it is a base unit' do
+        expect(meter).to be_base
+      end
+    end
   end
 end
