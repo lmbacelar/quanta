@@ -1,40 +1,64 @@
 class Quantity
-  include Comparable
+  #
+  # Class Methods
+  #
+  def self.one
+    Quantity.new :one, {}, symbol: '1'
+  end
 
-  attr_reader :value, :unit
-  def initialize value, unit
-    raise TypeError, 'value has to be numeric' unless value.is_a? Numeric
-    @value = value.to_f
-    @unit = unit
+  # 
+  # Instance Methods
+  #
+  attr_accessor :quantity, :name, :symbol, :dimensions
+  def initialize quantity = nil, dimensions_or_quantity = nil, options = {}
+    @quantity   = quantity
+    @name       = options.fetch(:name)   { quantity.to_s.tr_s '_', '  ' }
+    @symbol     = options.fetch(:symbol) { quantity.to_s.upcase }
+    @dimensions = case dimensions_or_quantity 
+      when NilClass  then { self => 1 }
+      when Hash      then dimensions_or_quantity
+      when Quantity  then dimensions_or_quantity.dimensions
+      else raise TypeError, 'dimensions_or_quantity must be nil, a hash or a quantity'
+    end
     freeze
   end
 
   def to_s
-    "#{value.to_s} #{unit.to_s}"
+    return symbol if base?
+    dimensions.map do |quantity, index|
+      index == 1 ? quantity.symbol : "#{quantity.symbol}^#{index}"
+    end.join ' . '
   end
 
-  def <=> other
-    other.is_a?(Quantity) && unit == other.unit && value <=> other.value
+  def base?
+    dimensions == { self => 1 }
+  end
+
+  def derived?
+    !base?
+  end
+
+  def one?
+    dimensions == {}
+  end
+
+  def == other
+    hash == other.hash
   end
 
   def hash
-    [Quantity, value, unit].hash
+    [Quantity, quantity, name, symbol].concat(
+      Array(dimensions).map { |dim, pow| [dim.quantity, dim.name, dim.symbol, pow] }
+    ).hash
   end
   alias_method :eql?, :==
 
-  def + other
-    add_or_subtract :+, other
+  def equivalent_to? other
+    dimensions.hash == other.dimensions.hash
   end
 
-  def - other
-    add_or_subtract :-, other
-  end
-
-  def add_or_subtract operator, other
-    raise TypeError unless other.is_a? Quantity
-    raise TypeError unless unit == other.unit
-    result = value.send operator, other.value
-    Quantity.new result, unit
+  def reciprocal
+    Quantity.new nil, Hash[dimensions.map{ |k, v| [k, v*-1] }]
   end
 
   def * other
@@ -45,9 +69,32 @@ class Quantity
     multiply_or_divide :/, other
   end
 
-  def multiply_or_divide operator, other
+  def ** other
     raise TypeError unless other.is_a? Numeric
-    result = value.send operator, other
-    Quantity.new result, unit
+    return Quantity.one    if other ==  0 || self.one?
+    return self.clone      if other ==  1
+    return self.reciprocal if other == -1
+
+    new_dimensions = Hash[dimensions.map{ |dim, pow| [dim, (pow * other).to_i] }].delete_if{ |_, pow| pow == 0 }
+    Quantity.new nil, new_dimensions
+  end
+
+  def coerce other
+    raise TypeError, "#{other.class} can't be coerced to Quantity" unless other.is_a? Numeric
+    return Quantity.one, self
+  end
+
+protected
+  def multiply_or_divide operator, other
+    return self.clone        if other.is_a? Numeric
+    raise TypeError          unless other.is_a? Quantity
+    return self.clone        if other.one?
+    other = other.reciprocal if operator == :/
+    return other.clone       if self.one?
+
+    new_dimensions = dimensions.merge(other.dimensions) do |_, pow, other_pow|
+      pow + other_pow
+    end.delete_if{ |_, pow| pow == 0 }
+    Quantity.new nil, new_dimensions
   end
 end
