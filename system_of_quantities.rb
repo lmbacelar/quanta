@@ -125,4 +125,21 @@ class SystemOfQuantities
     self
   end
 
+  def quantity_for quantity
+    case quantity
+      when Quantity then quantity if quantities.include? quantity
+      when Symbol   then quantities.select{ |q| q.quantity    == quantity }.first
+      when String   then quantities.select{ |q| q.quantity    == quantity.to_sym ||
+                                                q.name.upcase == quantity.upcase || 
+                                                q.symbol      == quantity }.first
+      else raise TypeError, ' quantity must be a quantity, name or symbol'
+    end
+  end
+
+  def method_missing method, *args, &block
+    if quantities = self.quantity_for(method)
+      return  quantities
+    end
+    super
+  end
 end

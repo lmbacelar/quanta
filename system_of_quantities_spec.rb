@@ -34,5 +34,30 @@ describe SystemOfQuantities do
         expect(isq.base_quantities.count).to eq 7
       end
     end
+
+    context 'Retrieval' do
+      it 'returns quantity for known quantity' do
+        mass = Quantity.new :mass, nil, symbol: 'M'
+        expect(isq.quantity_for mass  ).to eq mass
+        expect(isq.quantity_for :mass ).to eq mass
+        expect(isq.quantity_for 'Mass').to eq mass
+        expect(isq.quantity_for 'M'   ).to eq mass
+      end
+
+      it 'returns quantities using dynamic finders' do
+        expect(isq.mass).to eq isq.quantity_for :mass
+      end
+
+      it 'returns nil for unknown quantity' do
+        unknown = Quantity.new :unknown
+        expect(isq.quantity_for unknown  ).to be_nil
+        expect(isq.quantity_for :unknown ).to be_nil
+        expect(isq.quantity_for 'Unknown').to be_nil
+      end
+
+      it 'raises Type Error for incorrect type of quantity' do
+        expect{ isq.quantity_for [] }.to raise_error TypeError
+      end
+    end
   end
 end
