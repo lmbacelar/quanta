@@ -1,4 +1,4 @@
-class Quantity
+class Value
   include Comparable
 
   attr_reader :value, :unit
@@ -14,11 +14,11 @@ class Quantity
   end
 
   def <=> other
-    other.is_a?(Quantity) && unit == other.unit && value <=> other.value
+    other.is_a?(Value) && unit == other.unit && value <=> other.value
   end
 
   def hash
-    [Quantity, value, unit].hash
+    [Value, value, unit].hash
   end
   alias_method :eql?, :==
 
@@ -31,10 +31,10 @@ class Quantity
   end
 
   def add_or_subtract operator, other
-    raise TypeError unless other.is_a? Quantity
+    raise TypeError unless other.is_a? Value
     raise TypeError unless unit == other.unit
     result = value.send operator, other.value
-    Quantity.new result, unit
+    Value.new result, unit
   end
 
   def * other
@@ -48,6 +48,6 @@ class Quantity
   def multiply_or_divide operator, other
     raise TypeError unless other.is_a? Numeric
     result = value.send operator, other
-    Quantity.new result, unit
+    Value.new result, unit
   end
 end
