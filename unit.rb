@@ -1,12 +1,13 @@
 class Unit
-  attr_accessor :label, :name, :symbol, :factor, :dimension
-  def initialize label:, name: label.to_s, factor: 1.0, symbol:, dimension: :unity
-    raise TypeError, 'factor has to be numeric' unless factor.is_a? Numeric
-    @label     = label
-    @name      = name
-    @symbol    = symbol
-    @factor    = factor
-    @dimension = dimension
+  attr_reader :label, :name, :symbol, :factor, :quantity
+  def initialize label, symbol = '', factor = 1.0, quantity = Quantity.new, options = {}
+    raise TypeError, 'factor must be numeric'      unless factor.is_a?   Numeric
+    raise TypeError, 'quantity must be a Quantity' unless quantity.is_a? Quantity
+    @label    = label
+    @symbol   = symbol
+    @factor   = factor
+    @quantity = quantity
+    @name     = options.fetch(name) { label.to_s.tr_s '_', ' ' }
     freeze
   end
 end
