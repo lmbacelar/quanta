@@ -80,7 +80,7 @@ class SystemOfQuantities
     [ :electric_polarisation,         { length: -2,           time: 1,  electric_current: 1    } ],
     [ :electric_potential_difference, { length: 2,  mass: 1,  time: -3, electric_current: -1   } ],
     [ :electric_resistance,           { length: 2,  mass: 1,  time: -3, electric_current: -2   } ],
-    [ :electrical_capacitance,        { length: -2, mass: -1, time: 4,  electric_current: 2    } ],
+    [ :electric_capacitance,          { length: -2, mass: -1, time: 4,  electric_current: 2    } ],
     [ :energy,                        { length: 2,  mass: 1,  time: -2                         } ],
     [ :entropy,                       { length: 2,  mass: 1,  time: -2, temperature: -1        } ],
     [ :force,                         { length: 1,  mass: 1,  time: -2                         } ],
