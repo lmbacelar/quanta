@@ -1,3 +1,4 @@
+require 'debugger'
 require_relative 'system_of_quantities'
 require_relative 'quantity'
 
@@ -16,10 +17,9 @@ describe SystemOfQuantities do
         expect(cgs.quantities).to respond_to :each
       end
 
-      it 'allows individual addition of quantities' do
-        expect{ soq.add :mass,   nil,    symbol: 'M' }.to change{ soq.quantities.count }.by 1
-        expect{ soq.add :length, length, symbol: 'L' }.to change{ soq.quantities.count }.by 1
-        expect{ soq.add :radius, length              }.to change{ soq.quantities.count }.by 1
+      it 'allows individual addition of base or known quantities' do
+        expect{ soq.add :length,   nil,    symbol: 'L' }.to change{ soq.quantities.count }.by 1
+        expect{ soq.add :diameter, { length: 1 }       }.to change{ soq.quantities.count }.by 1
       end
 
       it 'allows bulk addition of quantities' do
@@ -30,8 +30,13 @@ describe SystemOfQuantities do
         }.to change{ soq.quantities.count }.by 1
       end
 
+      it 'raises Type Error when adding quantity based on unkown quantities' do
+        expect{ soq.add :quantity, { unknown: 1 } }.to raise_error TypeError
+      end
+
       it 'knows how to create itself according to the International System of Quantities' do
-        expect(isq.base_quantities.count).to eq 7
+        expect(isq.base_quantities.count).to eq 8
+        expect(isq.quantities.count     ).to eq 60
       end
     end
 
@@ -48,11 +53,11 @@ describe SystemOfQuantities do
         expect(isq.mass).to eq isq.quantity_for :mass
       end
 
-      it 'returns nil for unknown quantity' do
+      it 'raises Type Error for unknown quantity' do
         unknown = Quantity.new :unknown
-        expect(isq.quantity_for unknown  ).to be_nil
-        expect(isq.quantity_for :unknown ).to be_nil
-        expect(isq.quantity_for 'Unknown').to be_nil
+        expect{ isq.quantity_for unknown   }.to raise_error TypeError
+        expect{ isq.quantity_for :unknown  }.to raise_error TypeError
+        expect{ isq.quantity_for 'Unknown' }.to raise_error TypeError
       end
 
       it 'raises Type Error for incorrect type of quantity' do
