@@ -10,7 +10,7 @@ describe SystemOfUnits do
   let(:sou   ) { SystemOfUnits.new :sou, system_of_quantities: soq }
   let(:si    ) { SystemOfUnits.new(:isq, name: 'International System of Units', system_of_quantities: nil).load_si }
   let(:length) { Quantity.new :length }
-  let(:meter ) { Unit.new :meter, 'm', 1.0, length }
+  let(:meter ) { Unit.new :m, 'meter', 1.0, length }
   let(:mili  ) { Prefix.new :mili, 'm', 1.0e-3 }
 
   context 'Instance' do
@@ -32,7 +32,7 @@ describe SystemOfUnits do
         expect {
           sou.configure do
             add_prefix :mili,  'm', 1.0e-3
-            add_unit   :meter, 'm', 1.0, Quantity.new(:length)
+            add_unit   :m, 'meter', 1.0, Quantity.new(:length)
           end
         }.to change{ sou.prefixes.count }.by 1
       end
