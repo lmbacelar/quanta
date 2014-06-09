@@ -103,7 +103,7 @@ class SystemOfUnits
   SI_DERIVED_UNITS =
   [
     [ :Bq,  'Bequerel',       1.0,            :radioactivity                              ],
-    [ :ºC,  'degree Celsius', [1.0, 273.15],  :temperature                                ],
+    [ :ºC,  'degree Celsius', 1.0,            :temperature,            scale: 273.15      ],
     [ :C,   'Coloumb',        1.0,            :electric_charge                            ],
     [ :F,   'Farad',          1.0,            :electric_capacitance                       ],
     [ :Gy,  'Gray',           1.0,            :radiation_absorbed_dose                    ],
@@ -181,8 +181,8 @@ class SystemOfUnits
     [ :clo,            'clo',                          0.155,            :thermal_resistance                     ],
     [ :c_us,           'cup',                          236.5882e-6,      :volume,             symbol: 'c (US)'   ],
     [ :Ci,             'curie',                        37.0e9,           :radioactivity                          ],
-    [ :deg_F,          'degree Farenheit',             [5.0/9.0, 459.67],:temperature,        symbol: '°F'       ],
-    [ :deg_R,          'degree Rankine',               5.0/9.0,          :temperature,        symbol: '°R'       ],
+    [ :ºF,             'degree Farenheit',             5.0/9.0,          :temperature,        scale: 459.67      ],
+    [ :ºR,             'degree Rankine',               5.0/9.0,          :temperature                            ],
     [ :dram,           'dram',                         1.771845e-3,      :length                                 ],
     [ :dyn,            'dyne',                         10e-6,            :force                                  ],
     [ :dyn_cm,         'dyne centimetre',              100e-9,           :energy,             symbol: 'dyn cm'   ],
