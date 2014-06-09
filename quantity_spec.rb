@@ -87,30 +87,30 @@ describe Quantity do
 
     context 'Equivalence' do
       it 'base unit is equivalent to itself' do
-        expect(length).to be_equivalent_to length
+        expect(length).to be_same_kind_as length
       end
 
       it 'derived unit is equivalent to itself' do
-        expect(area).to be_equivalent_to area
+        expect(area).to be_same_kind_as area
       end
 
       it 'is equivalent to other quantity with the same dimensions' do
-        expect(frequency).to be_equivalent_to radioactivity
+        expect(frequency).to be_same_kind_as radioactivity
       end
 
       it 'is not equivalent to other base quantities' do
-        expect(length).not_to be_equivalent_to time
+        expect(length).not_to be_same_kind_as time
       end
 
       it 'is not equivalent to other distint derived quantities' do
-        expect(area).not_to be_equivalent_to velocity
+        expect(area).not_to be_same_kind_as velocity
       end
     end
 
     context 'Multiplication, Division and Power' do
       it 'can multiply itself by other quantity' do
-        expect(length * length).to be_equivalent_to area
-        expect(length * one   ).to be_equivalent_to length
+        expect(length * length).to be_same_kind_as area
+        expect(length * one   ).to be_same_kind_as length
       end
 
       it 'can multiply itself by a numeric and vice-versa' do
@@ -119,19 +119,19 @@ describe Quantity do
       end
 
       it 'defines multiplication as cumutative' do
-        expect(area * length  ).to be_equivalent_to(length * area)
-        expect(velocity * time).to be_equivalent_to(time * velocity)
+        expect(area * length  ).to be_same_kind_as(length * area)
+        expect(velocity * time).to be_same_kind_as(time * velocity)
       end
 
       it 'can divide itself by other quantity' do
-        expect(length / time       ).to be_equivalent_to velocity
-        expect(area / one).to be_equivalent_to area
-        expect(one / time).to be_equivalent_to frequency
+        expect(length / time       ).to be_same_kind_as velocity
+        expect(area / one).to be_same_kind_as area
+        expect(one / time).to be_same_kind_as frequency
       end
 
       it 'can divide itself by a numeric, and vice-versa' do
-        expect(time / 1).to be_equivalent_to time
-        expect(1 / time).to be_equivalent_to frequency
+        expect(time / 1).to be_same_kind_as time
+        expect(1 / time).to be_same_kind_as frequency
 
       end
 
@@ -144,23 +144,23 @@ describe Quantity do
       end
 
       it 'can power itself to positive integers' do
-        expect(length ** 2).to be_equivalent_to area
-        expect(length ** 1).to be_equivalent_to length
-        expect(one ** 2   ).to be_equivalent_to one
+        expect(length ** 2).to be_same_kind_as area
+        expect(length ** 1).to be_same_kind_as length
+        expect(one ** 2   ).to be_same_kind_as one
       end
 
       it 'can power itself to zero' do
-        expect(length ** 0).to be_equivalent_to one
-        expect(one ** 0   ).to be_equivalent_to one
+        expect(length ** 0).to be_same_kind_as one
+        expect(one ** 0   ).to be_same_kind_as one
       end
 
       it 'can power itself to negative integers' do
-        expect(time ** -1).to be_equivalent_to frequency
-        expect(one ** -1 ).to be_equivalent_to one
+        expect(time ** -1).to be_same_kind_as frequency
+        expect(one ** -1 ).to be_same_kind_as one
       end
 
       it 'can power itself to floats' do
-        expect(area ** 0.5).to be_equivalent_to length
+        expect(area ** 0.5).to be_same_kind_as length
       end
 
       it 'raises Type Error when powered to non Numeric' do

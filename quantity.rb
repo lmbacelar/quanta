@@ -53,7 +53,7 @@ class Quantity
   end
   alias_method :eql?, :==
 
-  def equivalent_to? other
+  def same_kind_as? other
     dimensions.hash == other.dimensions.hash
   end
 
