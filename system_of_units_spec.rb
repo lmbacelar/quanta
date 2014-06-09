@@ -42,7 +42,7 @@ describe SystemOfUnits do
       it 'knows how to create itself according to the International System of Units' do
         expect(si.prefixes.count     ).to eq 28
         expect(si.base_units.count   ).to be 8
-        expect(si.derived_units.count).to be 24
+        expect(si.derived_units.count).to be 160
         expect(si.units.count        ).to be 168
       end
     end
