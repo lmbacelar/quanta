@@ -1,4 +1,3 @@
-require 'debugger'
 require_relative 'system_of_quantities'
 require_relative 'quantity'
 
@@ -6,7 +5,6 @@ describe SystemOfQuantities do
         
   let(:soq   ) { SystemOfQuantities.new :soq }
   let(:isq   ) { SystemOfQuantities.new(:isq, name: 'International System of Quantities').load_isq }
-  let(:length) { Quantity.new :length }
 
   context 'Instance' do
     context 'Creation' do

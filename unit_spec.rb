@@ -1,6 +1,5 @@
 require_relative 'unit'
 require_relative 'quantity'
-require 'debugger'
 
 describe Unit do
 

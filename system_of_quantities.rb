@@ -30,8 +30,8 @@ class SystemOfQuantities
                                                       q.symbol      == quantity }.first
             else raise TypeError, ' quantity must be a quantity, name or symbol'
           end
-    raise TypeError, "unknown quantity '#{quantity}'" unless qty
-    return qty
+    return qty if qty
+    raise TypeError, "unknown quantity '#{quantity}'"
   end
 
   def method_missing method, *args, &block
