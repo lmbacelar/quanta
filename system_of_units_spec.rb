@@ -8,7 +8,7 @@ describe SystemOfUnits do
 
   let(:soq   ) { SystemOfQuantities.new :soq }
   let(:sou   ) { SystemOfUnits.new :sou, system_of_quantities: soq }
-  let(:si    ) { SystemOfUnits.new(:isq, name: 'International System of Units', system_of_quantities: nil).load_si }
+  let(:si    ) { SystemOfUnits.new(:isq, name: 'International System of Units').load_si }
   let(:length) { Quantity.new :length }
   let(:meter ) { Unit.new :m, 'meter', 1.0, length }
 
