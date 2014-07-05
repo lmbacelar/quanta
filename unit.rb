@@ -40,13 +40,28 @@ class Unit
   end
   alias_method :eql?, :==
 
-  def * other
-    label   = "#{label.to_s} #{other.label.to_s}".to_sym
-    name    = "#{name} #{other.name}"
-    debugger
-    fct     = factor * other.factor
-    qty     = quantity * other.quantity
-    Unit.new label, name, fct, qty
+  def ** other
+    term_for = { 2 => 'squared', 3 => 'cubed' }
+    Unit.new [label, term_for.fetch(other) { "^#{other}" }].join(' ').to_sym,
+             [name,  term_for.fetch(other) { "^#{other}" }].join(' '),
+             factor ** other,
+             quantity ** other
   end
 
+  def * other
+    multiply_or_divide :*, other
+  end
+
+  def / other
+    multiply_or_divide :/, other
+  end
+
+  def multiply_or_divide operator, other
+    raise TypeError unless other.is_a? Unit
+    term_for = { :* => '', :/ => 'per' }
+    Unit.new [label, term_for[operator], other.label].join(' ').to_sym,
+             [name,  term_for[operator], other.name ].join(' '),
+             factor.send(operator, other.factor),
+             quantity.send(operator, other.quantity)
+  end
 end
