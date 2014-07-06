@@ -15,6 +15,10 @@ class Unit
     freeze
   end
 
+  def self.unitless
+    Unit.new :unitless, '', 1.0, Quantity.one
+  end
+  
   def base?
     quantity.base? && factor == 1.0 && scale == 0.0
   end
@@ -56,6 +60,8 @@ class Unit
     multiply_or_divide :/, other
   end
 
+
+protected
   def multiply_or_divide operator, other
     raise TypeError unless other.is_a? Unit
     term_for = { :* => '', :/ => 'per' }

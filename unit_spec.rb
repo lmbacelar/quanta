@@ -17,7 +17,7 @@ describe Unit do
   let(:hertz      ) { Unit.new :Hz,  'Hertz',          1.0,        frequency                  }
   let(:kelvin     ) { Unit.new :K,   'Kelvin',         1.0,        temperature                }
   let(:celsius    ) { Unit.new :ºC,  'degree Celsius', 1.0,        temperature, scale: 273.15 }
-  let(:unitless   ) { Unit.new :one, '',               1.0,        one                        }
+  let(:unitless   ) { Unit.unitless                                                           }
   let(:percent    ) { Unit.new :pct, '%',              1.0e-2,     one                        }
   
   context 'Creation' do
