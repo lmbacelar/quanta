@@ -1,24 +1,27 @@
-require_relative 'unit'
 require_relative 'quantity'
+require_relative 'unit'
+require_relative 'prefix'
 
 describe Unit do
 
-  let(:length     ) { Quantity.new :length                                                    }
-  let(:time       ) { Quantity.new :time                                                      }
-  let(:temperature) { Quantity.new :temperature                                               }
-  let(:area       ) { Quantity.new :area,        { length =>  2 }                             }
-  let(:frequency  ) { Quantity.new :frequency,   { time   => -1 }                             }
-  let(:one        ) { Quantity.one                                                            }
-  let(:meter      ) { Unit.new :m,   'meter',          1.0,        length                     }
-  let(:inch       ) { Unit.new :in,  'inch',           0.0254,     length                     }
-  let(:mile       ) { Unit.new :mi,  'mile',           1.609344e3, length                     }
-  let(:are        ) { Unit.new :a,   'are',            100.0,      area                       }
-  let(:second     ) { Unit.new :s,   'second',         1.0,        time                       }
-  let(:hertz      ) { Unit.new :Hz,  'Hertz',          1.0,        frequency                  }
-  let(:kelvin     ) { Unit.new :K,   'Kelvin',         1.0,        temperature                }
-  let(:celsius    ) { Unit.new :ºC,  'degree Celsius', 1.0,        temperature, scale: 273.15 }
-  let(:unitless   ) { Unit.unitless                                                           }
-  let(:percent    ) { Unit.new :pct, '%',              1.0e-2,     one                        }
+  let(:length     ) { Quantity.new :length                                                        }
+  let(:time       ) { Quantity.new :time                                                          }
+  let(:temperature) { Quantity.new :temperature                                                   }
+  let(:area       ) { Quantity.new :area,                 { length =>  2 }                        }
+  let(:frequency  ) { Quantity.new :frequency,            { time   => -1 }                        }
+  let(:one        ) { Quantity.one                                                                }
+  let(:mili       ) { Prefix.new   :m,   'm',             1.0e-3,     name: 'mili'                }
+  let(:unitless   ) { Unit.unitless                                                               }
+  let(:meter      ) { Unit.new     :m,   'meter',          1.0,        length                     }
+  let(:inch       ) { Unit.new     :in,  'inch',           0.0254,     length                     }
+  let(:mile       ) { Unit.new     :mi,  'mile',           1.609344e3, length                     }
+  let(:are        ) { Unit.new     :a,   'are',            100.0,      area                       }
+  let(:second     ) { Unit.new     :s,   'second',         1.0,        time                       }
+  let(:hertz      ) { Unit.new     :Hz,  'Hertz',          1.0,        frequency                  }
+  let(:kelvin     ) { Unit.new     :K,   'Kelvin',         1.0,        temperature                }
+  let(:celsius    ) { Unit.new     :ºC,  'degree Celsius', 1.0,        temperature, scale: 273.15 }
+  let(:percent    ) { Unit.new     :pct, '%',              1.0e-2,     one                        }
+  let(:milimeter  ) { Unit.new     :m,   'meter',          1.0,        length,      prefix: mili  }
   
   context 'Creation' do
     it 'should have a label, a name, a symbol, a factor, a scale and a quantity' do
@@ -30,13 +33,23 @@ describe Unit do
       expect(celsius.quantity).to eq temperature
     end
 
-    it 'defaults name to label, symbol to label, factor to 1.0, scale to 0.0 and quantity to base' do
+    it 'label, name, symbol, factor are created accordingly, when prefix is present' do
+      expect(milimeter.label   ).to eq :mm
+      expect(milimeter.name    ).to eq 'milimeter'
+      expect(milimeter.symbol  ).to eq 'mm'
+      expect(milimeter.factor  ).to eq 1.0e-3
+      expect(milimeter.quantity).to eq length
+      expect(milimeter.prefix  ).to eq mili
+    end
+
+    it 'defaults name and symbol to label, factor to 1.0, scale to 0.0, quantity to base, and prefix to nil' do
       unit = Unit.new :a_label
       expect(unit.name    ).to eq ''
       expect(unit.symbol  ).to eq 'a label'
       expect(unit.factor  ).to eq 1.0
       expect(unit.scale   ).to eq 0.0
       expect(unit.quantity).to eq Quantity.new
+      expect(unit.prefix  ).to be_nil
     end
 
     it 'raises Type Error for non numeric factor' do
@@ -70,7 +83,12 @@ describe Unit do
       expect(meter).not_to be_derived
     end
 
+    it 'knows if it is a prefixed unit' do
+      expect(meter    ).not_to be_prefixed
+      expect(milimeter).to     be_prefixed
+    end
     it 'knows if it has the same kind as other unit' do
+      expect(meter).to     be_same_kind_as milimeter
       expect(meter).to     be_same_kind_as inch
       expect(meter).not_to be_same_kind_as second
     end
