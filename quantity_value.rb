@@ -33,6 +33,20 @@ class QuantityValue
     add_or_subtract :-, other
   end
 
+  def * other
+    multiply_or_divide :*, other
+  end
+
+  def / other
+    multiply_or_divide :/, other
+  end
+
+  def coerce other
+    raise TypeError, "#{other.class} can't be coerced to QuantityValue" unless other.is_a? Numeric
+    return QuantityValue.new(other.to_f, Unit.unitless), self
+  end
+
+protected
   def add_or_subtract operator, other
     raise TypeError unless other.is_a? QuantityValue
     raise TypeError unless unit.same_kind_as? other.unit
@@ -40,7 +54,14 @@ class QuantityValue
     QuantityValue.new result, unit, prefix
   end
 
-protected
+  def multiply_or_divide operator, other
+    other = QuantityValue.new(other.to_f, Unit.unitless) if other.is_a? Numeric
+    raise TypeError unless other.is_a? QuantityValue
+    result_value = value.send operator, other.base_value / factor
+    result_unit  = unit.send  operator, other.unit
+    QuantityValue.new result_value, result_unit, prefix
+  end
+
   def factor 
     unit.factor * ( prefix ? prefix.factor : 1 )
   end
