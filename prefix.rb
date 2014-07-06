@@ -8,4 +8,6 @@ class Prefix
     @name   = options.fetch(:name)   { label.to_s.tr_s '_', ' ' }
     freeze
   end
+
+  alias_method :to_s, :name
 end
