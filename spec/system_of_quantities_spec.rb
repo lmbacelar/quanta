@@ -1,10 +1,10 @@
-require_relative 'system_of_quantities'
-require_relative 'quantity'
+require_relative '../lib/quantity'
+require_relative '../lib/system_of_quantities'
 
 describe SystemOfQuantities do
         
-  let(:soq   ) { SystemOfQuantities.new :soq }
-  let(:isq   ) { SystemOfQuantities.new(:isq, name: 'International System of Quantities').load_isq }
+  let(:soq) { SystemOfQuantities.new :soq }
+  let(:isq) { SystemOfQuantities.new(:isq, name: 'International System of Quantities').load_isq }
 
   context 'Instance' do
     context 'Creation' do

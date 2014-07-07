@@ -22,7 +22,7 @@ class SystemOfUnits
   end
 
   def add_unit label, symbol=nil, factor=nil, quantity=nil, options={}
-    @units << Unit.new(label, symbol, factor, system_of_quantities.quantity_for(quantity), options)
+    @units << PlainUnit.new(label, symbol, factor, system_of_quantities.quantity_for(quantity), options)
     @units.last
   end
 

@@ -1,27 +1,9 @@
-require_relative 'quantity'
-require_relative 'unit'
-require_relative 'prefix'
+require_relative 'examples/plain_units'
+require_relative '../lib/composite_unit'
 
-describe Unit do
+describe PlainUnit do
 
-  let(:length     ) { Quantity.new :length                                                        }
-  let(:time       ) { Quantity.new :time                                                          }
-  let(:temperature) { Quantity.new :temperature                                                   }
-  let(:area       ) { Quantity.new :area,                 { length =>  2 }                        }
-  let(:frequency  ) { Quantity.new :frequency,            { time   => -1 }                        }
-  let(:one        ) { Quantity.one                                                                }
-  let(:mili       ) { Prefix.new   :m,   'm',             1.0e-3,     name: 'mili'                }
-  let(:unitless   ) { Unit.unitless                                                               }
-  let(:meter      ) { Unit.new     :m,   'meter',          1.0,        length                     }
-  let(:inch       ) { Unit.new     :in,  'inch',           0.0254,     length                     }
-  let(:mile       ) { Unit.new     :mi,  'mile',           1.609344e3, length                     }
-  let(:are        ) { Unit.new     :a,   'are',            100.0,      area                       }
-  let(:second     ) { Unit.new     :s,   'second',         1.0,        time                       }
-  let(:hertz      ) { Unit.new     :Hz,  'Hertz',          1.0,        frequency                  }
-  let(:kelvin     ) { Unit.new     :K,   'Kelvin',         1.0,        temperature                }
-  let(:celsius    ) { Unit.new     :ºC,  'degree Celsius', 1.0,        temperature, scale: 273.15 }
-  let(:percent    ) { Unit.new     :pct, '%',              1.0e-2,     one                        }
-  let(:milimeter  ) { Unit.new     :m,   'meter',          1.0,        length,      prefix: mili  }
+  include_context :plain_unit_examples
   
   context 'Creation' do
     it 'should have a label, a name, a symbol, a factor, a scale and a quantity' do
@@ -43,7 +25,7 @@ describe Unit do
     end
 
     it 'defaults name and symbol to label, factor to 1.0, scale to 0.0, quantity to base, and prefix to nil' do
-      unit = Unit.new :a_label
+      unit = PlainUnit.new :a_label
       expect(unit.name    ).to eq ''
       expect(unit.symbol  ).to eq 'a label'
       expect(unit.factor  ).to eq 1.0
@@ -53,15 +35,15 @@ describe Unit do
     end
 
     it 'raises Type Error for non numeric factor' do
-      expect{ Unit.new :u, 'unit', :non_numeric }.to raise_error TypeError
+      expect{ PlainUnit.new :u, 'unit', :non_numeric }.to raise_error TypeError
     end
     
     it 'raises Type Error for non numeric scale' do
-      expect{ Unit.new :u, 'unit', 1.0, length, scale: :non_numeric }.to raise_error TypeError
+      expect{ PlainUnit.new :u, 'unit', 1.0, length, scale: :non_numeric }.to raise_error TypeError
     end
 
     it 'raises Type Error for non Quantity quantity' do
-      expect{ Unit.new :m, 'meter', 1.0, :non_quantity }.to raise_error TypeError
+      expect{ PlainUnit.new :m, 'meter', 1.0, :non_quantity }.to raise_error TypeError
     end
 
     it 'should be immutable' do
@@ -87,6 +69,7 @@ describe Unit do
       expect(meter    ).not_to be_prefixed
       expect(milimeter).to     be_prefixed
     end
+
     it 'knows if it has the same kind as other unit' do
       expect(meter).to     be_same_kind_as milimeter
       expect(meter).to     be_same_kind_as inch
@@ -98,8 +81,6 @@ describe Unit do
     it 'converts itself to String' do
       expect(meter.to_s).to eq 'm'
     end
-    
-    # TODO: Compound units string conversion
   end
 
   context 'Comparison' do
@@ -127,14 +108,20 @@ describe Unit do
       expect(a_hash[meter.clone]).to eq :hash_value
     end
 
-    # TODO: Compound units comparison
+    it 'returns nil when compared to non unit' do
+      expect(meter <=> 'not a unit').to be_nil
+    end
   end
 
   context 'Multiplication and Division' do
+    it 'returns a composite unit when multiplied by another unit' do
+      expect(meter * meter).to be_a CompositeUnit
+    end
+
     it 'can multiply itself by other unit' do
-      expect(meter * meter).to be_same_kind_as are
       expect(length * one ).to be_same_kind_as length
       expect((inch * second).factor).to eq inch.factor * second.factor
+      expect(meter * meter).to be_same_kind_as are
     end
 
     it 'defines multiplication as cumutative' do

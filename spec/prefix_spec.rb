@@ -1,13 +1,13 @@
-require_relative 'prefix'
+require_relative 'examples/prefixes'
 
 describe Prefix do
 
-  let(:mili) { Prefix.new :mili, 'm', 1.0e-3 }
+  include_context :prefix_examples
 
   context 'Instance' do
     context 'Creation' do
       it 'should have a label, a name, a symbol and a factor' do
-        expect(mili.label ).to eq :mili
+        expect(mili.label ).to eq :m
         expect(mili.name  ).to eq 'mili'
         expect(mili.symbol).to eq 'm'
         expect(mili.factor).to eq 1.0e-3
@@ -33,7 +33,7 @@ describe Prefix do
 
   context 'Output' do
     it 'converts itself to String' do
-      expect(mili.to_s).to eq 'mili'
+      expect(mili.to_s).to eq 'm'
     end
   end
 end

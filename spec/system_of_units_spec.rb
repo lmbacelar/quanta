@@ -1,16 +1,14 @@
-require_relative 'system_of_units'
-require_relative 'unit'
-require_relative 'prefix'
-require_relative 'system_of_quantities'
-require_relative 'quantity'
+require_relative '../lib/system_of_units'
+require_relative '../lib/system_of_quantities'
+require_relative 'examples/plain_units'
 
 describe SystemOfUnits do
+
+  include_context :plain_unit_examples
 
   let(:soq   ) { SystemOfQuantities.new :soq }
   let(:sou   ) { SystemOfUnits.new :sou, system_of_quantities: soq }
   let(:si    ) { SystemOfUnits.new(:isq, name: 'International System of Units').load_si }
-  let(:length) { Quantity.new :length }
-  let(:meter ) { Unit.new :m, 'meter', 1.0, length }
 
   context 'Instance' do
     context 'Creation' do

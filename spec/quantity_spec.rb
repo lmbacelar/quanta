@@ -1,15 +1,9 @@
-require_relative 'quantity'
+require_relative 'examples/quantities'
 
 describe Quantity do
 
-  let(:length       ) { Quantity.new :length,        nil,                          symbol: 'L' }
-  let(:time         ) { Quantity.new :time,          nil,                          symbol: 'T' }
-  let(:area         ) { Quantity.new :area,          { length => 2 },              symbol: 'A' }
-  let(:velocity     ) { Quantity.new :velocity,      { length => 1 , time => -1 }, symbol: 'V' }
-  let(:frequency    ) { Quantity.new :frequency,     { time => -1 },               symbol: 'F' }
-  let(:radioactivity) { Quantity.new :radioactivity, { time => -1 },               symbol: 'R' }
-  let(:one          ) { Quantity.new :one,           {},                           symbol: '1' }
-    
+  include_context :quantity_examples
+
   context 'Instance' do
     context 'Creation' do
       it 'should have a quantity, a name, a symbol and a set of dimensions' do
@@ -124,9 +118,10 @@ describe Quantity do
       end
 
       it 'can divide itself by other quantity' do
-        expect(length / time       ).to be_same_kind_as velocity
-        expect(area / one).to be_same_kind_as area
-        expect(one / time).to be_same_kind_as frequency
+        expect(length / time).to be_same_kind_as velocity
+        expect(area / one   ).to be_same_kind_as area
+        expect(area / length).to be_same_kind_as length
+        expect(one / time   ).to be_same_kind_as frequency
       end
 
       it 'can divide itself by a numeric, and vice-versa' do
