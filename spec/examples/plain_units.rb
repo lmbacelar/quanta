@@ -16,7 +16,7 @@ RSpec.shared_context :plain_unit_examples do
   let(:hertz    ) { PlainUnit.new :Hz,  'Hertz',          1.0,        frequency                  }
   let(:kelvin   ) { PlainUnit.new :K,   'Kelvin',         1.0,        temperature                }
   let(:celsius  ) { PlainUnit.new :ºC,  'degree Celsius', 1.0,        temperature, scale: 273.15 }
-  let(:percent  ) { PlainUnit.new :pct, '%',              1.0e-2,     one                        }
+  let(:percent  ) { PlainUnit.new :pct, '%',              1.0e-2,     dimension_one              }
   let(:milimeter) { PlainUnit.new :m,   'meter',          1.0,        length,      prefix: mili  }
   let(:kilometer) { PlainUnit.new :m,   'meter',          1.0,        length,      prefix: kilo  }
   let(:microinch) { PlainUnit.new :in,  'inch',           0.0254,     length,      prefix: micro }

@@ -1,7 +1,7 @@
 require_relative '../../lib/quantity'
 
 RSpec.shared_context :quantity_examples do
-  let(:one          ) { Quantity.new :one,           {},                           symbol: '1'     }
+  let(:dimension_one) { Quantity.new :dimension_one, {},                           symbol: '1'     }
   let(:length       ) { Quantity.new :length,        nil,                          symbol: 'L'     }
   let(:time         ) { Quantity.new :time,          nil,                          symbol: 'T'     }
   let(:mass         ) { Quantity.new :mass,          nil,                          symbol: 'M'     }
