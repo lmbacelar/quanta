@@ -1,3 +1,6 @@
+require_relative 'core_extensions/integer'
+require_relative 'core_extensions/numeric'
+
 class PlainUnit < Unit
   attr_reader :symbol, :prefix
   def initialize label, name = '', factor = 1.0, quantity = Quantity.new, options = {}
@@ -15,15 +18,11 @@ class PlainUnit < Unit
   end
 
   def self.unitless
-    PlainUnit.new :unitless, '', 1.0, Quantity.one
+    PlainUnit.new :"", '', 1.0, Quantity.dimension_one
   end
   
   def prefixed?
     !!prefix
-  end
-
-  def to_s
-    label.to_s
   end
 
   def hash
@@ -39,9 +38,10 @@ class PlainUnit < Unit
   end
 
   def ** other
-    term_for = { 2 => 'squared', 3 => 'cubed' }
-    PlainUnit.new [label, term_for.fetch(other) { "^#{other}" }].join(' ').to_sym,
-                  [name,  term_for.fetch(other) { "^#{other}" }].join(' '),
+    other = other.base_value if other.is_a?(QuantityValue) && other.unitless?
+    raise TypeError unless other.is_a? Numeric
+    PlainUnit.new label_for(:**, other),
+                  name_for( :**, other),
                   factor ** other,
                   quantity ** other
   end
@@ -57,15 +57,17 @@ protected
 
   def label_for operator, other
     case operator
-    when :* then [label, '.', other.label].join.to_sym
-    when :/ then [label, '/', other.label].join.to_sym
+    when :*  then [label, '.', other.label    ].join.to_sym
+    when :/  then [label, '/', other.label    ].join.to_sym
+    when :** then other == 1 ? label : [label, other.to_superscript].join.to_sym
     end
   end
 
   def name_for operator, other
     case operator
-    when :* then [label, '.', other.label].join.to_sym
-    when :/ then [label, '/', other.label].join.to_sym
+      when :*  then [name,        other.name].join(' ').strip
+      when :/  then [name, 'per', other.name].join(' ').strip
+      when :** then [name, {1=>'', 2=>'squared', 3=>'cubed'}.fetch(other){"raised to #{other}"}].join(' ').strip
     end
   end
 

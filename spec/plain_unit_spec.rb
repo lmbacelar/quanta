@@ -1,9 +1,10 @@
-require_relative 'examples/plain_units'
+require_relative 'examples/quantity_values'
 require_relative '../lib/composite_unit'
 
 describe PlainUnit do
 
-  include_context :plain_unit_examples
+  # include_context :plain_unit_examples
+  include_context :quantity_value_examples
   
   context 'Creation' do
     it 'should have a label, a name, a symbol, a factor, a scale and a quantity' do
@@ -57,6 +58,11 @@ describe PlainUnit do
   end
 
   context 'Inspection' do
+    it 'knows if it is unitless' do
+      expect(meter   ).not_to be_unitless
+      expect(unitless).to     be_unitless
+    end
+
     it 'knows if it is a base unit' do
       expect(meter).to be_base
     end
@@ -118,8 +124,16 @@ describe PlainUnit do
       expect(meter * meter).to be_a CompositeUnit
     end
 
+    it 'defaults multiplication result label, name according to units labels, names' do
+      expect((meter * second).label   ).to eq :"m.s"
+      expect((meter * second).name    ).to eq 'meter second'
+      expect((meter / second).label   ).to eq :"m/s"
+      expect((meter / second).name    ).to eq 'meter per second'
+      expect((unitless / second).label).to eq :"/s"
+      expect((unitless / second).name ).to eq 'per second'
+    end
+
     it 'can multiply itself by other unit' do
-      expect(length * one ).to be_same_kind_as length
       expect((inch * second).factor).to eq inch.factor * second.factor
       expect(meter * meter).to be_same_kind_as are
     end
@@ -145,6 +159,20 @@ describe PlainUnit do
       expect{ meter / 2            }.to raise_error TypeError
     end
 
+    it 'defaults power result label, name according to unit label, name' do
+      expect((meter ** -1      ).label).to eq :m⁻¹
+      expect((meter **  0      ).label).to eq :m⁰
+      expect((meter **  1      ).label).to eq :m
+      expect((meter **  2      ).label).to eq :m²
+      expect((meter **  11     ).label).to eq :m¹¹
+      expect((meter ** -1      ).name ).to eq 'meter raised to -1'
+      expect((meter **  0      ).name ).to eq 'meter raised to 0'
+      expect((meter **  1      ).name ).to eq 'meter'
+      expect((meter **  2      ).name ).to eq 'meter squared'
+      expect((meter **  3      ).name ).to eq 'meter cubed'
+      expect((meter **  11     ).name ).to eq 'meter raised to 11'
+    end
+
     it 'can power itself to positive integers' do
       expect(meter ** 2).to be_same_kind_as are
       expect((inch ** 2).factor).to eq inch.factor ** 2
@@ -165,6 +193,10 @@ describe PlainUnit do
     it 'can power itself to floats' do
       expect(are ** 0.5).to be_same_kind_as meter
       expect((are ** 0.5).factor).to eq are.factor ** 0.5
+    end
+
+    it 'can power itself to unitless quantity value' do
+      expect(meter ** two).to eq (meter ** 2)
     end
 
     it 'raises Type Error when powered to non Numeric' do
