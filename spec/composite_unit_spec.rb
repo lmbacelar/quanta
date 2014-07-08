@@ -44,14 +44,23 @@ describe CompositeUnit do
       expect{ meter_per_second.instance_variable_set :@factor, 0 }.to raise_error
       expect{ meter_per_second.instance_variable_set :@units,  0 }.to raise_error
     end
-
-    # TODO: Test quantity creation logic (partially tested on plain_unit_spec
   end
 
   context 'Inspection' do
+    it 'knows when it is unitless' do
+      expect(milimeter_per_meter.unitless?).to be_true
+      expect(newton.unitless?             ).to be_false
+    end
+
     it 'knows if it has the same kind as other composite unit' do
       expect(meter_per_second).to be_same_kind_as kilometer_per_hour
       expect(meter).not_to be_same_kind_as second
+    end
+  end
+
+  context 'Output' do
+    it 'converts itself to String' do
+      expect(meter_per_second.to_s).to eq 'm/s'
     end
   end
 end

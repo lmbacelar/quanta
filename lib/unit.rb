@@ -7,6 +7,14 @@ class Unit
     freeze
   end
 
+  def to_s
+    label.to_s
+  end
+
+  def unitless?
+    quantity.dimension_one?
+  end
+
   def base?
     quantity.base? && factor == 1.0 && scale == 0.0
   end
