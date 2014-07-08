@@ -13,6 +13,14 @@ class QuantityValue
     "#{value.to_s} #{unit.to_s}"
   end
 
+  def unitless?
+    unit.unitless?
+  end
+
+  def base_value
+    value * unit.factor
+  end
+
   def <=> other
     other.is_a?(QuantityValue) && 
     unit.same_kind_as?(other.unit) && 
@@ -56,13 +64,8 @@ protected
   def multiply_or_divide operator, other
     other = QuantityValue.new(other.to_f, PlainUnit.unitless) if other.is_a? Numeric
     raise TypeError unless other.is_a? QuantityValue
-    result_value = value.send operator, other.base_value / unit.factor
+    result_value = value.send operator, other.value
     result_unit  = unit.send  operator, other.unit
     QuantityValue.new result_value, result_unit
   end
-
-  def base_value
-    value * unit.factor
-  end
 end
-
