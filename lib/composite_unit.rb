@@ -1,3 +1,5 @@
+require_relative 'core_extensions/array'
+
 class CompositeUnit < Unit
   attr_reader :units 
   def initialize label, name, units = []
@@ -29,14 +31,3 @@ protected
   end
 end
 
-#
-# Adding custom mapper to Array
-# map_hash maps array of hashes
-#
-# [{2 => 1},{4 => 2}].map_hash{ |k,v| k*v }  ====>  [2, 8]
-#
-class Array
-  def map_hash &block
-    self.map{ |hash| hash.map { |k,v| block.call(k,v) } }.flatten
-  end
-end
