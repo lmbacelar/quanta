@@ -1,17 +1,7 @@
-require_relative 'examples/plain_units'
-require_relative '../lib/composite_unit'
-require_relative '../lib/quantity_value'
+require_relative 'examples/quantity_values'
 
 describe QuantityValue do
-  include_context :plain_unit_examples
-  let(:zero_meters    ) { QuantityValue.new 0,      meter                                   }
-  let(:one_meter      ) { QuantityValue.new 1,      meter                                   }
-  let(:other_one_meter) { QuantityValue.new 1,      meter                                   }
-  let(:two_meters     ) { QuantityValue.new 2,      meter                                   }
-  let(:three_meters   ) { QuantityValue.new 3,      meter                                   }
-  let(:one_kilometer  ) { QuantityValue.new 1,      kilometer                               }
-  let(:one_microinch  ) { QuantityValue.new 1,      microinch                               }
-  let(:one_second     ) { QuantityValue.new 1,      second                                  }
+  include_context :quantity_value_examples
 
   context 'Creation' do
     it 'should have a value and a unit' do
@@ -30,6 +20,13 @@ describe QuantityValue do
     end
   end
 
+  context 'Inspection' do
+    it 'knows when it is unitless' do
+      expect(one.unitless?      ).to be_true
+      expect(one_meter.unitless?).to be_false
+    end
+  end
+
   context 'Output' do
     it 'converts itself to String' do
       expect(one_meter.to_s    ).to eq '1.0 m'
@@ -38,7 +35,6 @@ describe QuantityValue do
   end
   
   context 'Comparison' do
-
     it 'can compare itself to other quantity values of the same unit and prefix' do
       expect(one_meter  <=> two_meters     ).to eq -1 
       expect(two_meters <=> one_meter      ).to eq  1 
@@ -115,87 +111,67 @@ describe QuantityValue do
   end
 
   context 'Multiplication and Division' do
-    let(:hertz                ) { PlainUnit.new          :Hz,          'Hertz',                    1.0, frequency     }
-    let(:squared_meter        ) { PlainUnit.new          :m²,          'squared meter',            1.0, area          }
-    let(:squared_kilometer    ) { kilometer * kilometer                                                          }
-    let(:meter_second         ) { PlainUnit.new          :m_s,         'meter second',             1,   length_time   }
-    let(:meter_per_second     ) { PlainUnit.new          :"m/s",       'meter per second',         1,   velocity      }
-    let(:zero                 ) { QuantityValue.new 0,            unitless                                       }
-    let(:one                  ) { QuantityValue.new 1,            unitless                                       }
-    let(:two                  ) { QuantityValue.new 2,            unitless                                       }
-    let(:one_hertz            ) { QuantityValue.new 1,            hertz                                          }
-    let(:one_squared_meter    ) { QuantityValue.new 1,            squared_meter                                  }
-    let(:one_squared_kilometer) { QuantityValue.new 1,            squared_kilometer                              }
-    let(:one_meter_second     ) { QuantityValue.new 1,            meter_second                                   }
-    let(:one_meter_per_second ) { QuantityValue.new 1,            meter_per_second                               }
-
-    xit 'can multiply itself by quantity value with same dimensions' do
+    it 'can multiply itself by quantity value with same dimensions' do
       expect(one_meter * one_meter).to eq one_squared_meter
     end
 
-    xit 'can multiply itself by quantity value with same unit' do
+    it 'can multiply itself by quantity value with same unit' do
       expect(one_kilometer * one_kilometer).to eq one_squared_kilometer
     end
 
-    xit 'can multiply itself by quantity value with same dimensions and different units' do
-      # TODO: rethink this. what should this do ? 
-      #   result with op1 prefix ?                       (1 kilo meter_squared)
-      #   result with no prefix ?                        (1_000_000 meter_squared)
-      #   result with compound unit and both prefixes ?  (1 kilo meter * kilo meter)
-      expect(one_kilometer * one_meter).to eq QuantityValue.new(0.001, squared_kilometer)
+    it 'can multiply itself by quantity value with same dimensions and different units' do
+      expect((one_kilometer * one_meter).to_s).to eq '1.0 km.m'
+      expect((one_kilometer / one_meter).base_value).to eq 1000
     end
 
-    xit 'can multiply itself by a quantity value with different dimensions' do
+    it 'can multiply itself by a quantity value with different dimensions' do
       expect(one_meter * one_second).to eq one_meter_second
     end
 
-    xit 'can multiply itself by a dimensionless quantity value' do
+    it 'can multiply itself by a dimensionless quantity value' do
       expect(one_meter * zero).to eq zero_meters
       expect(one_meter * one ).to eq one_meter
       expect(one_meter * two ).to eq two_meters
       expect(two * one_meter ).to eq two_meters
     end
 
-    xit 'can multiply itself by a numeric' do
+    it 'can multiply itself by a numeric' do
       expect(one_meter * 2).to eq two_meters
       expect(2 * one_meter).to eq two_meters
     end
 
-    xit 'raises TypeError when multiplied by non-numeric' do
+    it 'raises TypeError when multiplied by non-numeric' do
       expect{ one_meter * 'not a number' }.to raise_error TypeError
     end
 
-    xit 'can divide itself by quantity value with same dimensions' do
+    it 'can divide itself by quantity value with same dimensions' do
       expect(one_meter / one_meter).to eq one
     end
 
-    xit 'can divide itself by quantity value with same units' do
+    it 'can divide itself by quantity value with same units' do
       expect(one_kilometer / one_kilometer).to eq one
     end
 
-    xit 'can divide itself by quantity value with same dimensions and different prefix' do
-    # TODO: rethink this. what should this do ? 
-    #   result with op1 prefix ?                       (1 kilo meter_squared)
-    #   result with no prefix ?                        (1_000_000 meter_squared)
-    #   result with compound unit and both prefixes ?  (1 kilo meter * kilo meter)
-      expect(one_kilometer / one_meter).to eq QuantityValue.new(1000, unitless)
+    it 'can divide itself by quantity value with same dimensions and different prefix' do
+      expect((one_milimeter / one_meter).to_s      ).to eq '1.0 mm/m'
+      expect((one_milimeter / one_meter).base_value).to eq 0.001
     end
 
-    xit 'can divide itself by a quantity value with different dimensions' do
+    it 'can divide itself by a quantity value with different dimensions' do
       expect(one_meter / one_second).to eq one_meter_per_second
     end
 
-    xit 'can divide itself by a dimensionless quantity value' do
+    it 'can divide itself by a dimensionless quantity value' do
       expect(two_meters / one).to eq two_meters
       expect(two_meters / two).to eq one_meter
     end
 
-    xit 'can didvide itself by a numeric' do
+    it 'can divide itself by a numeric' do
       expect(two_meters / 2).to eq one_meter
       expect(1 / one_second).to eq one_hertz
     end
 
-    xit 'raises TypeError when divided by non-numeric' do
+    it 'raises TypeError when divided by non-numeric' do
       expect{ one_meter / 'not a number' }.to raise_error TypeError
     end
 
