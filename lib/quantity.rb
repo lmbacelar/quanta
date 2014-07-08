@@ -2,8 +2,8 @@ class Quantity
   #
   # Class Methods
   #
-  def self.one
-    Quantity.new :one, {}, symbol: '1'
+  def self.dimension_one
+    Quantity.new :dimension_one, {}, symbol: '1'
   end
 
   # 
@@ -38,7 +38,7 @@ class Quantity
     !base?
   end
 
-  def one?
+  def dimension_one?
     dimensions == {}
   end
 
@@ -71,9 +71,9 @@ class Quantity
 
   def ** other
     raise TypeError unless other.is_a? Numeric
-    return Quantity.one    if other ==  0 || self.one?
-    return self.clone      if other ==  1
-    return self.reciprocal if other == -1
+    return Quantity.dimension_one if other ==  0 || self.dimension_one?
+    return self.clone             if other ==  1
+    return self.reciprocal        if other == -1
 
     new_dimensions = Hash[dimensions.map{ |dim, pow| [dim, (pow * other).to_i] }].delete_if{ |_, pow| pow == 0 }
     Quantity.new nil, new_dimensions
@@ -81,16 +81,16 @@ class Quantity
 
   def coerce other
     raise TypeError, "#{other.class} can't be coerced to Quantity" unless other.is_a? Numeric
-    return Quantity.one, self
+    return Quantity.dimension_one, self
   end
 
 protected
   def multiply_or_divide operator, other
     return self.clone        if other.is_a? Numeric
     raise TypeError          unless other.is_a? Quantity
-    return self.clone        if other.one?
+    return self.clone        if other.dimension_one?
     other = other.reciprocal if operator == :/
-    return other.clone       if self.one?
+    return other.clone       if self.dimension_one?
 
     new_dimensions = dimensions.merge(other.dimensions) do |_, pow, other_pow|
       pow + other_pow

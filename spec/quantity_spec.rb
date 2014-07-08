@@ -22,7 +22,7 @@ describe Quantity do
 
       it 'can be created using existing quantity' do
         expect(Quantity.new :radius,      length,        symbol: 'R'    ).to be_a Quantity
-        expect(Quantity.new :plane_angle, Quantity.one, symbol: 'ANGLE').to be_a Quantity
+        expect(Quantity.new :plane_angle, Quantity.dimension_one, symbol: 'ANGLE').to be_a Quantity
       end
 
       it 'for base quantities, sets dimensions to self to the power of one' do
@@ -103,8 +103,8 @@ describe Quantity do
 
     context 'Multiplication, Division and Power' do
       it 'can multiply itself by other quantity' do
-        expect(length * length).to be_same_kind_as area
-        expect(length * one   ).to be_same_kind_as length
+        expect(length * length       ).to be_same_kind_as area
+        expect(length * dimension_one).to be_same_kind_as length
       end
 
       it 'can multiply itself by a numeric and vice-versa' do
@@ -118,10 +118,10 @@ describe Quantity do
       end
 
       it 'can divide itself by other quantity' do
-        expect(length / time).to be_same_kind_as velocity
-        expect(area / one   ).to be_same_kind_as area
-        expect(area / length).to be_same_kind_as length
-        expect(one / time   ).to be_same_kind_as frequency
+        expect(length / time       ).to be_same_kind_as velocity
+        expect(area / dimension_one).to be_same_kind_as area
+        expect(area / length       ).to be_same_kind_as length
+        expect(dimension_one / time).to be_same_kind_as frequency
       end
 
       it 'can divide itself by a numeric, and vice-versa' do
@@ -139,19 +139,19 @@ describe Quantity do
       end
 
       it 'can power itself to positive integers' do
-        expect(length ** 2).to be_same_kind_as area
-        expect(length ** 1).to be_same_kind_as length
-        expect(one ** 2   ).to be_same_kind_as one
+        expect(length        ** 2).to be_same_kind_as area
+        expect(length        ** 1).to be_same_kind_as length
+        expect(dimension_one ** 2).to be_same_kind_as dimension_one
       end
 
       it 'can power itself to zero' do
-        expect(length ** 0).to be_same_kind_as one
-        expect(one ** 0   ).to be_same_kind_as one
+        expect(length        ** 0).to be_same_kind_as dimension_one
+        expect(dimension_one ** 0).to be_same_kind_as dimension_one
       end
 
       it 'can power itself to negative integers' do
-        expect(time ** -1).to be_same_kind_as frequency
-        expect(one ** -1 ).to be_same_kind_as one
+        expect(time          ** -1).to be_same_kind_as frequency
+        expect(dimension_one ** -1).to be_same_kind_as dimension_one
       end
 
       it 'can power itself to floats' do
