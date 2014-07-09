@@ -13,7 +13,7 @@ describe Quantity do
         expect(length         ).to respond_to :dimensions
       end
 
-      it 'defaults to base quantity, name to quantity, symbol to uppercase quantity)' do
+      it 'defaults to base quantity, name to quantity, symbol to uppercase quantity' do
         quantity = Quantity.new :some_quantity
         expect(quantity.name  ).to eq 'some quantity'
         expect(quantity.symbol).to eq 'SOME_QUANTITY'
