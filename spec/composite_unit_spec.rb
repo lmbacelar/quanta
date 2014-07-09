@@ -37,30 +37,12 @@ describe CompositeUnit do
     it 'raises Type Error for units indexed to non numeric' do
       expect{ CompositeUnit.new :u, 'unit', meter => :non_numeric }.to raise_error TypeError
     end
-
-    it 'should be immutable' do
-      expect{ meter_per_second.instance_variable_set :@label,  0 }.to raise_error
-      expect{ meter_per_second.instance_variable_set :@name,   0 }.to raise_error
-      expect{ meter_per_second.instance_variable_set :@factor, 0 }.to raise_error
-      expect{ meter_per_second.instance_variable_set :@units,  0 }.to raise_error
-    end
   end
 
-  context 'Inspection' do
-    it 'knows when it is unitless' do
-      expect(milimeter_per_meter.unitless?).to be_true
-      expect(newton.unitless?             ).to be_false
-    end
-
-    it 'knows if it has the same kind as other composite unit' do
-      expect(meter_per_second).to be_same_kind_as kilometer_per_hour
-      expect(meter).not_to be_same_kind_as second
-    end
-  end
-
-  context 'Output' do
-    it 'converts itself to String' do
-      expect(meter_per_second.to_s).to eq 'm/s'
+  context 'Comparison' do
+    it 'implements hash equality based on label, name and units' do
+      a_hash = { newton => :hash_value }
+      expect(a_hash[newton.clone]).to eq :hash_value
     end
   end
 end

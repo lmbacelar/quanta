@@ -14,7 +14,7 @@ class CompositeUnit < Unit
   end
 
   def hash
-    [CompositeUnit, label, name, factor, scale, quantity, units].hash
+    [CompositeUnit, label, name, units].hash
   end
 
 protected
