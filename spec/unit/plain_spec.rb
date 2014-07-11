@@ -1,8 +1,9 @@
-require_relative 'examples/quantity_values'
+require_relative '../examples/units/plain'
 
-describe PlainUnit do
+describe Unit::Plain do
 
-  include_context :quantity_value_examples
+  # include_context :quantity_value_examples
+  include_context :plain_unit_examples
   
   context 'Creation' do
     it 'should have a label, a name, a symbol, a factor, a scale and a quantity' do
@@ -24,7 +25,7 @@ describe PlainUnit do
     end
 
     it 'defaults name and symbol to label, factor to 1.0, scale to 0.0, quantity to base, and prefix to nil' do
-      unit = PlainUnit.new :a_label
+      unit = Unit::Plain.new :a_label
       expect(unit.name    ).to eq ''
       expect(unit.symbol  ).to eq 'a label'
       expect(unit.factor  ).to eq 1.0
@@ -34,15 +35,15 @@ describe PlainUnit do
     end
 
     it 'raises Type Error for non numeric factor' do
-      expect{ PlainUnit.new :u, 'unit', :non_numeric }.to raise_error TypeError
+      expect{ Unit::Plain.new :u, 'unit', :non_numeric }.to raise_error TypeError
     end
     
     it 'raises Type Error for non numeric scale' do
-      expect{ PlainUnit.new :u, 'unit', 1.0, length, scale: :non_numeric }.to raise_error TypeError
+      expect{ Unit::Plain.new :u, 'unit', 1.0, length, scale: :non_numeric }.to raise_error TypeError
     end
 
     it 'raises Type Error for non Quantity quantity' do
-      expect{ PlainUnit.new :m, 'meter', 1.0, :non_quantity }.to raise_error TypeError
+      expect{ Unit::Plain.new :m, 'meter', 1.0, :non_quantity }.to raise_error TypeError
     end
   end
 

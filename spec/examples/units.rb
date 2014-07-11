@@ -1,5 +1,5 @@
-require_relative 'plain_units'
-require_relative 'composite_units'
+require_relative 'units/plain'
+require_relative 'units/composite'
 
 RSpec.shared_context :unit_examples do
   include_context :plain_unit_examples

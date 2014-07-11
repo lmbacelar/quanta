@@ -1,6 +1,6 @@
 require_relative '../lib/system_of_units'
 require_relative '../lib/system_of_quantities'
-require_relative 'examples/plain_units'
+require_relative 'examples/units/plain'
 
 describe SystemOfUnits do
 

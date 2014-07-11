@@ -1,7 +1,7 @@
-require_relative 'examples/plain_units'
-require_relative 'examples/composite_units'
+require_relative '../examples/units/plain'
+require_relative '../examples/units/composite'
 
-describe CompositeUnit do
+describe Unit::Composite do
   include_context :composite_unit_examples
 
   context 'Creation' do
@@ -22,20 +22,20 @@ describe CompositeUnit do
     end
 
     it 'raises Type Error for empty units' do
-      expect{ CompositeUnit.new :u, 'unit', {} }.to raise_error TypeError
-      expect{ CompositeUnit.new :u, 'unit' }.to raise_error TypeError
+      expect{ Unit::Composite.new :u, 'unit', [] }.to raise_error TypeError
+      expect{ Unit::Composite.new :u, 'unit'     }.to raise_error TypeError
     end
 
     it 'raises Type Error for non Unit units' do
-      expect{ CompositeUnit.new :u, 'unit', :non_unit }.to raise_error TypeError
+      expect{ Unit::Composite.new :u, 'unit', :non_unit }.to raise_error TypeError
     end
 
     it 'raises Type Error for non indexed units' do
-      expect{ CompositeUnit.new :u, 'unit', meter }.to raise_error TypeError
+      expect{ Unit::Composite.new :u, 'unit', meter }.to raise_error TypeError
     end
 
     it 'raises Type Error for units indexed to non numeric' do
-      expect{ CompositeUnit.new :u, 'unit', meter => :non_numeric }.to raise_error TypeError
+      expect{ Unit::Composite.new :u, 'unit', meter => :non_numeric }.to raise_error TypeError
     end
   end
 
