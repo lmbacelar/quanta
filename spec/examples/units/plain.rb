@@ -1,5 +1,6 @@
 require_relative '../quantities'
-require_relative '../prefixes'
+require_relative 'prefixes'
+require_relative '../../../lib/unit/prefix'
 require_relative '../../../lib/unit/common'
 require_relative '../../../lib/unit/arithmetic'
 require_relative '../../../lib/unit/plain'

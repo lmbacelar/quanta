@@ -17,7 +17,7 @@ class SystemOfUnits
   end
 
   def add_prefix label, symbol=nil, factor=nil, options={}
-    @prefixes << Prefix.new(label, symbol, factor, options)
+    @prefixes << Unit::Prefix.new(label, symbol, factor, options)
     @prefixes.last
   end
 

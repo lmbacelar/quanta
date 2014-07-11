@@ -1,6 +1,6 @@
-require_relative 'examples/prefixes'
+require_relative '../examples/units/prefixes'
 
-describe Prefix do
+describe Unit::Prefix do
 
   include_context :prefix_examples
 
@@ -14,12 +14,12 @@ describe Prefix do
       end
 
       it 'defaults factor to 1.0' do
-        mili = Prefix.new :none
+        mili = Unit::Prefix.new :none
         expect(mili.factor).to eq 1.0
       end
 
       it 'raises TypeError when factor in not numeric' do
-        expect{ Prefix.new :label, 'symbol', :not_a_numeric }.to raise_error TypeError
+        expect{ Unit::Prefix.new :label, 'symbol', :not_a_numeric }.to raise_error TypeError
       end
 
       it 'should be immutable' do
