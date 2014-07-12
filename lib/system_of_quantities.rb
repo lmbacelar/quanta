@@ -1,20 +1,15 @@
-class SystemOfQuantities
-  attr_reader :label, :name, :quantities
-  def initialize label, options = {}
-    @label      = label
-    @name       = options.fetch(:name) { label.to_s.tr_s '_', ' ' }
-    @quantities = options.fetch(quantities) { [] }
-  end
+module SystemOfQuantities
+
+  extend self
+  
+  @quantities = []
+  attr_accessor :label, :name, :quantities
 
   def add quantity, qtys, options = {}
     # ensure each quantity in qtys exists in quantities
     qtys = Hash[qtys.map{ |qty, pow| [quantity_for(qty), pow] }] unless qtys.nil?
     @quantities << Quantity.new(quantity, qtys, options)
     @quantities.last
-  end
-
-  def base_quantities
-    quantities.select{ |quantity| quantity.base? }
   end
 
   def configure(&block)
@@ -34,17 +29,20 @@ class SystemOfQuantities
     raise TypeError, "unknown quantity '#{quantity}'"
   end
 
+  def load_isq
+    ISQ_BASE_QUANTITIES.each    { |args| add *args }
+    ISQ_DERIVED_QUANTITIES.each { |args| add *args }
+  end
+
+  def base_quantities
+    quantities.select{ |quantity| quantity.base? }
+  end
+
   def method_missing method, *args, &block
     if quantities = self.quantity_for(method)
       return  quantities
     end
     super
-  end
-
-  def load_isq
-    ISQ_BASE_QUANTITIES.each    { |args| add *args }
-    ISQ_DERIVED_QUANTITIES.each { |args| add *args }
-    return self
   end
 
   #
