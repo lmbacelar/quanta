@@ -32,6 +32,7 @@ module SystemOfQuantities
   def load_isq
     ISQ_BASE_QUANTITIES.each    { |args| add *args }
     ISQ_DERIVED_QUANTITIES.each { |args| add *args }
+    self
   end
 
   def base_quantities
