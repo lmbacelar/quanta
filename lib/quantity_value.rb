@@ -48,7 +48,7 @@ class QuantityValue
 
   def coerce other
     raise TypeError, "#{other.class} can't be coerced to #{self.class}" unless other.is_a? Numeric
-    return self.class.new(other.to_f, Unit::Plain.unitless), self
+    return self.class.new(other.to_f, SI::Unit::Plain.unitless), self
   end
 
 protected
@@ -60,7 +60,7 @@ protected
   end
 
   def multiply_or_divide operator, other
-    other = self.class.new(other.to_f, Unit::Plain.unitless) if other.is_a? Numeric
+    other = self.class.new(other.to_f, SI::Unit::Plain.unitless) if other.is_a? Numeric
     raise TypeError unless other.is_a? self.class
     result_value = value.send operator, other.value
     result_unit  = unit.send  operator, other.unit

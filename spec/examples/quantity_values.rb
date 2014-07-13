@@ -1,4 +1,4 @@
-require_relative 'units'
+require_relative 'si/units'
 require_relative '../../lib/quantity_value'
 
 RSpec.shared_context :quantity_value_examples do

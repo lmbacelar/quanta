@@ -1,6 +1,6 @@
 require_relative '../lib/si'
 require_relative '../lib/isq'
-require_relative 'examples/units/plain'
+require_relative 'examples/si/units/plain'
 
 describe SI do
   include_context :plain_unit_examples
