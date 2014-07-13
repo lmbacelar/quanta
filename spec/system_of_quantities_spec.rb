@@ -1,16 +1,16 @@
-require_relative '../lib/quantity'
 require_relative '../lib/system_of_quantities'
+require_relative '../lib/system_of_quantities/quantity'
 
 describe SystemOfQuantities do
         
-  subject(:soq) { SystemOfQuantities          }
+  subject(:soq) { SystemOfQuantities }
 
   context 'Properties' do
     it 'should have a label, a name, and a collection of quantities' do
-      soq.label = :c_g_s
-      soq.name  = 'Centimeter Gram Second'
-      expect(soq.label     ).to eq :c_g_s
-      expect(soq.name      ).to eq 'Centimeter Gram Second'
+      soq.label = :quantity_system
+      soq.name  = 'Quantity System'
+      expect(soq.label     ).to eq :quantity_system
+      expect(soq.name      ).to eq 'Quantity System'
       expect(soq.quantities).to respond_to :each
     end
   end
@@ -46,7 +46,7 @@ describe SystemOfQuantities do
   context 'Retrieval' do
     before(:each) { SystemOfQuantities.load_isq }
     it 'returns quantity for known quantity' do
-      mass = Quantity.new :mass, nil, symbol: 'M'
+      mass = SystemOfQuantities::Quantity.new :mass, nil, symbol: 'M'
       expect(soq.quantity_for mass  ).to eq mass
       expect(soq.quantity_for :mass ).to eq mass
       expect(soq.quantity_for 'Mass').to eq mass
@@ -58,7 +58,7 @@ describe SystemOfQuantities do
     end
 
     it 'raises TypeError for unknown quantity' do
-      unknown = Quantity.new :unknown
+      unknown = SystemOfQuantities::Quantity.new :unknown
       expect{ soq.quantity_for unknown   }.to raise_error TypeError
       expect{ soq.quantity_for :unknown  }.to raise_error TypeError
       expect{ soq.quantity_for 'Unknown' }.to raise_error TypeError
