@@ -1,12 +1,9 @@
-class SystemOfUnits
-  attr_reader :label, :name, :prefixes, :units, :system_of_quantities
-  def initialize label, options = {}
-    @label                = label
-    @name                 = options.fetch(:name)                 { label.to_s.tr_s '_', '  ' }
-    @prefixes             = options.fetch(:prefixes)             { []  }
-    @units                = options.fetch(:units)                { []  }
-    @system_of_quantities = options.fetch(:system_of_quantities) { nil }
-  end
+module SystemOfUnits
+  
+  extend self
+
+  @prefixes, @units = [], []
+  attr_accessor :label, :name, :prefixes, :units, :system_of_quantities
 
   def base_units
     units.select(&:base?)
@@ -31,10 +28,9 @@ class SystemOfUnits
   end
 
   def load_si
-    @system_of_quantities = SystemOfQuantities.new(:isq, name: 'International System of Quantities').load_isq
+    @system_of_quantities = SystemOfQuantities.load_isq
     load_si_prefixes
     load_si_units
-    return self
   end
 
   def load_si_prefixes
