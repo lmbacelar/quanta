@@ -37,6 +37,29 @@ module SI
           expect(mili.to_s).to eq 'm'
         end
       end
+
+      context 'Comparison' do
+        it 'can compare itself to other prefixes' do
+          other_mili = mili.clone
+          expect(mili <=> micro     ).to eq  1 
+          expect(mili <=> other_mili).to eq  0
+          expect(mili <=> kilo      ).to eq -1 
+        end
+
+        it 'knows if it is between other prefixes' do
+          expect(mili.between? micro, kilo).to     be_true
+          expect(kilo.between? mili, micro).not_to be_true
+        end
+
+        it 'returns nil when compared to non prefix' do
+          expect(mili <=> 'not a unit').to be_nil
+        end
+
+        it 'implements hash equality based on label, factor, name and symbol' do
+          a_hash = { mili => :hash_value }
+          expect(a_hash[mili.clone]).to eq :hash_value
+        end
+      end
     end
   end
 end
