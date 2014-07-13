@@ -7,10 +7,10 @@ module SI
 
       context 'Creation' do
         it 'should have a label, a name, a factor and a collection of indexed units' do
-          expect(meter_per_second.label ).to eq :"m/s"
-          expect(meter_per_second.name  ).to eq 'meter per second'
-          expect(meter_per_second.factor).to eq 1.0
-          expect(meter_per_second.units ).to respond_to :each
+          expect(metre_per_second.label ).to eq :"m/s"
+          expect(metre_per_second.name  ).to eq 'metre per second'
+          expect(metre_per_second.factor).to eq 1.0
+          expect(metre_per_second.units ).to respond_to :each
         end
 
         it 'raises Type Error for empty units' do
@@ -23,11 +23,11 @@ module SI
         end
 
         it 'raises Type Error for non indexed units' do
-          expect{ Composite.new :u, 'unit', meter }.to raise_error TypeError
+          expect{ Composite.new :u, 'unit', metre }.to raise_error TypeError
         end
 
         it 'raises Type Error for units indexed to non numeric' do
-          expect{ Composite.new :u, 'unit', meter => :non_numeric }.to raise_error TypeError
+          expect{ Composite.new :u, 'unit', metre => :non_numeric }.to raise_error TypeError
         end
       end
 

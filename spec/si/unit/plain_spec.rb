@@ -16,12 +16,12 @@ module SI
         end
 
         it 'label, name, symbol, factor are created accordingly, when prefix is present' do
-          expect(milimeter.label   ).to eq :mm
-          expect(milimeter.name    ).to eq 'milimeter'
-          expect(milimeter.symbol  ).to eq 'mm'
-          expect(milimeter.factor  ).to eq 1.0e-3
-          expect(milimeter.quantity).to eq length
-          expect(milimeter.prefix  ).to eq mili
+          expect(milimetre.label   ).to eq :mm
+          expect(milimetre.name    ).to eq 'milimetre'
+          expect(milimetre.symbol  ).to eq 'mm'
+          expect(milimetre.factor  ).to eq 1.0e-3
+          expect(milimetre.quantity).to eq length
+          expect(milimetre.prefix  ).to eq mili
         end
 
         it 'defaults name and symbol to label, factor to 1.0, scale to 0.0, quantity to base, and prefix to nil' do
@@ -43,14 +43,14 @@ module SI
         end
 
         it 'raises Type Error for non Quantity quantity' do
-          expect{ Plain.new :m, 'meter', 1.0, :non_quantity }.to raise_error TypeError
+          expect{ Plain.new :m, 'metre', 1.0, :non_quantity }.to raise_error TypeError
         end
       end
 
       context 'Inspection' do
         it 'knows if it is a prefixed unit' do
-          expect(meter    ).not_to be_prefixed
-          expect(milimeter).to     be_prefixed
+          expect(metre    ).not_to be_prefixed
+          expect(milimetre).to     be_prefixed
         end
       end
 
@@ -60,8 +60,8 @@ module SI
         end
 
         it 'implements hash equality based on label, name, symbol, factors and quantity' do
-          a_hash = { meter => :hash_value }
-          expect(a_hash[meter.clone]).to eq :hash_value
+          a_hash = { metre => :hash_value }
+          expect(a_hash[metre.clone]).to eq :hash_value
         end
       end
     end

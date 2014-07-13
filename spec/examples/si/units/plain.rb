@@ -12,7 +12,7 @@ module SI
       include_context :prefix_examples
 
       let(:unitless   ) { Plain.unitless                                                           }
-      let(:meter      ) { Plain.new :m,   'meter',          1.0,        length                     }
+      let(:metre      ) { Plain.new :m,   'metre',          1.0,        length                     }
       let(:inch       ) { Plain.new :in,  'inch',           0.0254,     length                     }
       let(:mile       ) { Plain.new :mi,  'mile',           1.609344e3, length                     }
       let(:are        ) { Plain.new :a,   'are',            100.0,      area                       }
@@ -21,8 +21,8 @@ module SI
       let(:kelvin     ) { Plain.new :K,   'Kelvin',         1.0,        temperature                }
       let(:celsius    ) { Plain.new :ºC,  'degree Celsius', 1.0,        temperature, scale: 273.15 }
       let(:percent    ) { Plain.new :pct, '%',              1.0e-2,     dimension_one              }
-      let(:milimeter  ) { Plain.new :m,   'meter',          1.0,        length,      prefix: mili  }
-      let(:kilometer  ) { Plain.new :m,   'meter',          1.0,        length,      prefix: kilo  }
+      let(:milimetre  ) { Plain.new :m,   'metre',          1.0,        length,      prefix: mili  }
+      let(:kilometre  ) { Plain.new :m,   'metre',          1.0,        length,      prefix: kilo  }
       let(:microinch  ) { Plain.new :in,  'inch',           0.0254,     length,      prefix: micro }
       let(:hour       ) { Plain.new :h,   'hour',           3600.0,     time                       }
       let(:kilogram   ) { Plain.new :g,   'gram',           1.0,        mass,        prefix: kilo  }
