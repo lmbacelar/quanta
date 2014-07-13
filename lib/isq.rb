@@ -29,21 +29,30 @@ module ISQ
     raise TypeError, "unknown quantity '#{quantity}'"
   end
 
-  def load
-    BASE_QUANTITIES.each    { |args| add *args }
-    DERIVED_QUANTITIES.each { |args| add *args }
-    self
-  end
-
   def base_quantities
     quantities.select{ |quantity| quantity.base? }
   end
 
-  def method_missing method, *args, &block
-    if quantities = self.quantity_for(method)
-      return  quantities
-    end
+  def respond_to? method, include_private = false
+    return !!self.quantity_for(method) rescue TypeError
     super
+  end
+
+  def method_missing method, *args, &block
+    return self.quantity_for(method) rescue TypeError
+    super
+  end
+
+  def clear!
+    @label, @name = nil, nil
+    @quantities   = []
+  end
+
+  def load!
+    clear!
+    BASE_QUANTITIES.each    { |args| add *args }
+    DERIVED_QUANTITIES.each { |args| add *args }
+    self
   end
 
   #

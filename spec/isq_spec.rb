@@ -14,11 +14,21 @@ describe ISQ do
   end
 
   context 'International System of Quantities' do
-    before(:each) { ISQ.load }
+    before(:each) { ISQ.load! }
 
     it 'knows how to create itself according to the International System of Quantities' do
       expect(ISQ.base_quantities.count).to eq 8
       expect(ISQ.quantities.count     ).to eq 60
+    end
+  end
+
+  context 'Clearing' do
+    it 'clears itself' do
+      ISQ.clear!
+      expect(ISQ.label          ).to be_nil
+      expect(ISQ.name           ).to be_nil
+      expect(ISQ.base_quantities).to be_empty
+      expect(ISQ.quantities).to be_empty
     end
   end
 
@@ -42,7 +52,7 @@ describe ISQ do
   end
 
   context 'Retrieval' do
-    before(:each) { ISQ.load }
+    before(:each) { ISQ.load! }
     it 'returns quantity for known quantity' do
       mass = ISQ::Quantity.new :mass, nil, symbol: 'M'
       expect(ISQ.quantity_for mass  ).to eq mass
