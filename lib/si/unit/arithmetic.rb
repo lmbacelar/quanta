@@ -8,7 +8,8 @@ module SI
       include Comparable
 
       def <=> other
-        quantity.same_kind_as?(other.quantity) && factor <=> other.factor rescue nil
+        return nil unless other.is_a? Unit
+        quantity.same_kind_as?(other.quantity) && factor <=> other.factor
       end
       alias_method :eql?, :==
 
