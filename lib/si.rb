@@ -1,9 +1,9 @@
-module SystemOfUnits
+module SI
   
   extend self
 
   @prefixes, @units = [], []
-  attr_accessor :label, :name, :prefixes, :units, :system_of_quantities
+  attr_accessor :label, :name, :prefixes, :units, :isq
 
   def base_units
     units.select(&:base?)
@@ -19,7 +19,7 @@ module SystemOfUnits
   end
 
   def add_unit label, symbol=nil, factor=nil, quantity=nil, options={}
-    @units << Unit::Plain.new(label, symbol, factor, system_of_quantities.quantity_for(quantity), options)
+    @units << Unit::Plain.new(label, symbol, factor, isq.quantity_for(quantity), options)
     @units.last
   end
 
@@ -27,8 +27,8 @@ module SystemOfUnits
     instance_eval(&block) if block
   end
 
-  def load_si
-    @system_of_quantities = SystemOfQuantities.load_isq
+  def load
+    @isq = ISQ.load
     load_si_prefixes
     load_si_units
   end

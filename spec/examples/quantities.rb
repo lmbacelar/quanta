@@ -1,6 +1,6 @@
-require_relative '../../lib/system_of_quantities/quantity'
+require_relative '../../lib/isq/quantity'
 
-module SystemOfQuantities
+module ISQ
   RSpec.shared_context :quantity_examples do
     let(:dimension_one) { Quantity.new :dimension_one, {},                         symbol: '1'     }
     let(:length       ) { Quantity.new :length,        nil,                        symbol: 'L'     }

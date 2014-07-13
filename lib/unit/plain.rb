@@ -5,9 +5,9 @@ module Unit
 
     attr_reader :symbol, :prefix
 
-    def initialize label, name = '', factor = 1.0, quantity = SystemOfQuantities::Quantity.new, options = {}
+    def initialize label, name = '', factor = 1.0, quantity = ISQ::Quantity.new, options = {}
       raise TypeError, 'factor must be numeric'      unless factor.is_a?   Numeric
-      raise TypeError, 'quantity must be a quantity' unless quantity.is_a? SystemOfQuantities::Quantity
+      raise TypeError, 'quantity must be a quantity' unless quantity.is_a? ISQ::Quantity
       @prefix   = options.fetch(:prefix) { nil }
       @label    = "#{prefix ? prefix.label  : ''}#{label}".to_sym
       @name     = "#{prefix ? prefix.name   : ''}#{name}"
@@ -21,7 +21,7 @@ module Unit
     end
 
     def self.unitless
-      new :"", '', 1.0, SystemOfQuantities::Quantity.dimension_one
+      new :"", '', 1.0, ISQ::Quantity.dimension_one
     end
     
     def prefixed?

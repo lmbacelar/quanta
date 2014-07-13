@@ -30,7 +30,7 @@ describe Unit::Plain do
       expect(unit.symbol  ).to eq 'a label'
       expect(unit.factor  ).to eq 1.0
       expect(unit.scale   ).to eq 0.0
-      expect(unit.quantity).to eq SystemOfQuantities::Quantity.new
+      expect(unit.quantity).to eq ISQ::Quantity.new
       expect(unit.prefix  ).to be_nil
     end
 

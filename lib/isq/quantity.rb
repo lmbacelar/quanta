@@ -1,4 +1,4 @@
-module SystemOfQuantities
+module ISQ
   class Quantity
     def self.dimension_one
       Quantity.new :dimension_one, {}, symbol: '1'

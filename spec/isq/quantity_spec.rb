@@ -1,6 +1,6 @@
 require_relative '../examples/quantities'
 
-module SystemOfQuantities
+module ISQ
   describe Quantity do
 
     include_context :quantity_examples

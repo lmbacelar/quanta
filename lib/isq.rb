@@ -1,4 +1,4 @@
-module SystemOfQuantities
+module ISQ
 
   extend self
   
@@ -29,9 +29,9 @@ module SystemOfQuantities
     raise TypeError, "unknown quantity '#{quantity}'"
   end
 
-  def load_isq
-    ISQ_BASE_QUANTITIES.each    { |args| add *args }
-    ISQ_DERIVED_QUANTITIES.each { |args| add *args }
+  def load
+    BASE_QUANTITIES.each    { |args| add *args }
+    DERIVED_QUANTITIES.each { |args| add *args }
     self
   end
 
@@ -49,7 +49,7 @@ module SystemOfQuantities
   #
   #  International System of Quantities (ISQ) Constants
   #
-  ISQ_BASE_QUANTITIES =
+  BASE_QUANTITIES =
   [
     [ :length,              nil, symbol: 'L'           ],
     [ :mass,                nil, symbol: 'M'           ],
@@ -61,7 +61,7 @@ module SystemOfQuantities
     [ :information,         nil, symbol: 'INFORMATION' ]
   ]
 
-  ISQ_DERIVED_QUANTITIES =
+  DERIVED_QUANTITIES =
   [
     [ :acceleration,                  { length: 1,            time: -2                         } ],
     [ :angle,                         {                                                        } ],
