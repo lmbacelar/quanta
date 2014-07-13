@@ -2,7 +2,7 @@ module SI
   
   extend self
 
-  @prefixes, @units = [], []
+  @prefixes, @units, @isq = [], [], nil
   attr_accessor :label, :name, :prefixes, :units, :isq
 
   def base_units
@@ -14,21 +14,68 @@ module SI
   end
 
   def add_prefix label, symbol=nil, factor=nil, options={}
-    @prefixes << Unit::Prefix.new(label, symbol, factor, options)
-    @prefixes.last
+    return prefix_for(label) rescue TypeError
+    @prefixes << prefix = Unit::Prefix.new(label, symbol, factor, options)
+    prefix
   end
 
   def add_unit label, symbol=nil, factor=nil, quantity=nil, options={}
-    @units << Unit::Plain.new(label, symbol, factor, isq.quantity_for(quantity), options)
-    @units.last
+    return unit_for(label) rescue TypeError
+    @units << unit = Unit::Plain.new(label, symbol, factor, isq.quantity_for(quantity), options)
+    unit
   end
 
   def configure(&block)
     instance_eval(&block) if block
   end
 
-  def load
-    @isq = ISQ.load
+  def prefix_for prefix
+    prf = case prefix
+            when Unit::Prefix   then prefix if prefixes.include? prefix
+            when Symbol, String then prefixes.select{ |p| p.label == prefix.to_sym ||
+                                                       p.name.upcase == prefix.to_s.upcase || 
+                                                       p.symbol      == prefix.to_s }.first
+            else raise TypeError, 'prefix must be a prefix, name or symbol'
+          end
+    return prf if prf
+    raise TypeError, "unknown prefix '#{prefix}'"
+  end
+
+  def unit_for unit
+    unt = case unit
+            when Unit::Plain    then unit if units.include? unit
+            when Symbol, String then units.select{ |u| u.label == unit.to_sym ||
+                                                    u.name.upcase == unit.to_s.upcase || 
+                                                    u.symbol      == unit.to_s }.first
+            else raise TypeError, 'unit must be a unit, name or symbol'
+          end
+    return unt if unt
+    raise TypeError, "unknown unit '#{unit}'"
+  end
+
+  def unit_or_prefix_for method, *args, &block
+    return self.unit_for(  method) rescue TypeError
+    return self.prefix_for(method)
+  end
+
+  def respond_to? method, include_private = false
+    return !!unit_or_prefix_for(method) rescue TypeError
+    super
+  end
+
+  def method_missing method, *args, &block
+    return unit_or_prefix_for(method) rescue TypeError
+    super
+  end
+
+  def clear!
+    @label, @name, @isq = nil, nil, nil
+    @prefixes, @units   = [],  []
+  end
+
+  def load!
+    clear!
+    @isq = ISQ.load!
     load_si_prefixes
     load_si_units
   end
@@ -120,8 +167,8 @@ module SI
     [ :V,   'Volt',           1.0,            :electric_potential_difference              ],
     [ :W,   'Watt',           1.0,            :power                                      ],
     [ :Wb,  'Weber',          1.0,            :magnetic_flux                              ],
-    [ :m²,  'squared meter',  1.0,            :area                                       ],
-    [ :m³,  'cubic meter',    1.0,            :volume                                     ]
+    [ :m²,  'squared metre',  1.0,            :area                                       ],
+    [ :m³,  'cubic metre',    1.0,            :volume                                     ]
   ]
 
   #
@@ -136,7 +183,7 @@ module SI
     [ :arc_minute,     'minute',                       Math::PI/10_800,  :plane_angle,        symbol: "'"        ],
     [ :arc_second,     'second',                       Math::PI/648_000, :plane_angle,        symbol: '"'        ],
     [ :ha,             'hectare',                      1.0e4,            :area                                   ],
-    [ :L,              'liter',                        1.0e-3,           :volume                                 ],
+    [ :L,              'litre',                        1.0e-3,           :volume                                 ],
     [ :eV,             'electronvolt',                 1.602_176_487_40e-19, :energy                             ],
     [ :ua,             'astronomical unit',            1.495_978_706_916e11, :length                             ],
     [ :Da,             'Dalton',                       1.660_538_782_83e-27, :mass                               ],
@@ -146,7 +193,7 @@ module SI
     [ :Å,              'Angstrom',                     1.0e-10,          :length                                 ],
     [ :b,              'barn',                         1.0e-28,          :area                                   ],
     [ :bar,            'bar',                          1.0e5,            :pressure                               ],
-    [ :mmHg,           'milimeter of mercury',         133.322,          :pressure                               ]
+    [ :mmHg,           'milimetre of mercury',         133.32222,        :pressure                               ]
   ]
 
   NON_SI_UNITS =
@@ -182,11 +229,11 @@ module SI
     [ :dram,           'dram',                         1.771845e-3,      :length                                 ],
     [ :dyn,            'dyne',                         10e-6,            :force                                  ],
     [ :dyn_cm,         'dyne centimetre',              100e-9,           :energy,             symbol: 'dyn cm'   ],
-    [ :hp_elec,        'electric horsepower',          746.0,            :power,              symbol: 'hp'       ],
+    [ :hp_elec,        'electric horsepower',          746.0,            :power,              symbol: 'hp (Elec)'],
     [ :me,             'electron mass',                9.10938188e-31,   :mass                                   ],
     [ :ell,            'ell',                          1.143,            :length                                 ],
     [ :erg,            'erg',                          100.0e-9,         :energy                                 ],
-    [ :F,              'faraday',                      96.4853e3,        :electric_charge                        ],
+    [ :faraday,        'faraday',                      96.48533924e3,    :electric_charge                        ],
     [ :ftm,            'fathom',                       1.828804,         :length                                 ],
     [ :fm,             'fermi',                        1e-15,            :length                                 ],
     [ :ft,             'foot',                         0.3048,           :length                                 ],
@@ -199,7 +246,6 @@ module SI
     [ :grad,           'grad',                         Math::PI/200.0,   :plane_angle                            ],
     [ :gr,             'grain',                        64.79891e-6,      :mass                                   ],
     [ :Eh,             'hartree',                      4.359748e-18,     :energy                                 ],
-    [ :ha,             'hectare',                      10e3,             :area                                   ],
     [ :hhd,            'hogshead',                     238.6697e-3,      :volume                                 ],
     [ :cwt_long,       'hundredweight long',           50.802345,        :mass,               symbol: 'cwt'      ],
     [ :cwt_short,      'hundredweight short',          45.359237,        :mass,               symbol: 'cwt'      ],
@@ -213,14 +259,11 @@ module SI
     [ :ly,             'light year',                   9.46073e15,       :length                                 ],
     [ :ln,             'line',                         2.116667e-3,      :length                                 ],
     [ :lnk,            'link',                         201.168e-3,       :length                                 ],
-    [ :L,              'litre',                        1e-3,             :volume                                 ],
     [ :ton_uk,         'long ton',                     1.016047e3,       :mass,               symbol: 'ton'      ],
     [ :Mx,             'maxwell',                      10e-9,            :magnetic_flux                          ],
     [ :hp,             'metric horsepower',            735.4988,         :power                                  ],
     [ :mi,             'mile',                         1.609344e3,       :length                                 ],
     [ :mbar,           'millibar',                     100,              :pressure                               ],
-    [ :mmHg,           'millimetre of mercury',        1.333222e2,       :pressure                               ],
-    [ :min,            'minute',                       60.0,             :time                                   ],
     [ :month,          'month',                        2.551444e6,       :time                                   ],
     [ :nl,             'nautical league',              5.556e3,          :length                                 ],
     [ :nmi,            'nautical mile',                1.852e3,          :length                                 ],
@@ -244,7 +287,7 @@ module SI
     [ :Ry,             'rydberg',                      2.179874e-18,     :energy,                                ],
     [ :ton_us,         'short ton',                    907.1847,         :mass,               symbol: 'ton'      ],
     [ :d_sid,          'sidereal day',                 86.16409053e3,    :time,               symbol: 'd'        ],
-    [ :year_sid,       'sidereal year',                31558823.803728,  :time,               symbol: 'yr'       ],
+    [ :year_sid,       'sidereal year',                31558823.803728,  :time,               symbol: 'yr (sid)' ],
     [ :lea,            'statute league',               4.828032e3,       :length                                 ],
     [ :sphere,         'sphere',                       4*Math::PI,       :solid_angle                            ],
     [ :sn,             'sthene',                       1e3,              :force                                  ],
@@ -256,10 +299,10 @@ module SI
     [ :t,              'tonne',                        1000.0,           :mass                                   ],
     [ :bbl_imp,        'UK barrel',                    163.6592e-3,      :volume,             symbol: 'bl (Imp)' ],
     [ :oz_fl_uk,       'UK fluid ounce',               28.41308e-6,      :volume,             symbol: 'fl oz'    ],
-    [ :gal_uk,         'UK gallon',                    4.546092e-3,      :volume,             symbol: 'gal'      ],
+    [ :gal_uk,         'UK gallon',                    4.546092e-3,      :volume,             symbol: 'gal (UK)' ],
     [ :gi_uk,          'UK gill',                      142.0654e-6,      :volume,             symbol: 'gi'       ],
-    [ :hp_uk,          'UK horsepower',                745.6999,         :power,              symbol: 'hp'       ],
-    [ :gal_dry_us,     'US dry gallon',                4.40488377086e-3, :volume,             symbol: 'gal'      ],
+    [ :hp_uk,          'UK horsepower',                745.6999,         :power,              symbol: 'hp (UK)'  ],
+    [ :gal_dry_us,     'US dry gallon',                4.40488377086e-3, :volume,             symbol: 'gal (US)' ],
     [ :bbl_dry_us,     'US dry barrel',                115.6271e-3,      :volume,             symbol: 'bl (US)'  ],
     [ :oz_fl,          'US fluid ounce',               29.57353e-6,      :volume,             symbol: 'fl oz'    ],
     [ :gi_us,          'US gill',                      118.2941e-6,      :volume,             symbol: 'gi'       ],
