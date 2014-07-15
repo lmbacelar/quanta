@@ -67,7 +67,8 @@ module ISQ
     [ :temperature,         nil, symbol: 'Θ'           ],
     [ :luminous_intensity,  nil, symbol: 'L'           ],
     [ :amount_of_substance, nil, symbol: 'J'           ],
-    [ :information,         nil, symbol: 'INFORMATION' ]
+    [ :information,         nil, symbol: 'INFORMATION' ],
+    [ :dimension_one,       {},  symbol: '1'           ]
   ]
 
   DERIVED_QUANTITIES =

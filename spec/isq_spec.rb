@@ -18,7 +18,7 @@ describe ISQ do
 
     it 'knows how to create itself according to the International System of Quantities' do
       expect(ISQ.base_quantities.count).to eq 8
-      expect(ISQ.quantities.count     ).to eq 60
+      expect(ISQ.quantities.count     ).to eq 61
     end
   end
 
