@@ -19,24 +19,22 @@ module SI
 
       def * other
         raise TypeError unless other.is_a? Unit
-        Unit::Composite.new [label, '.', other.label    ].join.to_sym,
-                            [name,        other.name].join(' ').strip,
-                            { self => 1 } , { other => 1 }
+        return self  if other.unitless?
+        return other if self.unitless?
+        Unit::Composite.new nil, nil, { self => 1 } , { other => 1 }
       end
 
       def / other
         raise TypeError unless other.is_a? Unit
-        Unit::Composite.new [label, '/', other.label    ].join.to_sym,
-                            [name, 'per', other.name].join(' ').strip,
-                            { self => 1 } , { other => -1 }
+        return self if other.unitless?
+        Unit::Composite.new nil, nil, { self => 1 } , { other => -1 }
       end
 
       def ** other
         other = other.base_value if other.is_a?(QuantityValue) && other.unitless?
         raise TypeError unless other.is_a? Numeric
-        Unit::Composite.new other == 1 ? label : [label, other.to_superscript].join.to_sym,
-                            [name, {1=>'',2=>'squared',3=>'cubed'}.fetch(other){"raised to #{other}"}].join(' ').strip,
-                            { self => other }
+        return self if other == 1
+        Unit::Composite.new nil, nil, { self => other }
       end
     end
   end

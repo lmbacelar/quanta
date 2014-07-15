@@ -81,14 +81,15 @@ module SI
       end
 
       context 'Exponentiation' do
-
         it 'defaults power result label, name according to unit label, name' do
-          expect((metre ** -1      ).label).to eq :m⁻¹
+          expect((metre ** -2      ).label).to eq :"/m²"
+          expect((metre ** -1      ).label).to eq :"/m"
           expect((metre **  0      ).label).to eq :m⁰
           expect((metre **  1      ).label).to eq :m
           expect((metre **  2      ).label).to eq :m²
           expect((metre **  11     ).label).to eq :m¹¹
-          expect((metre ** -1      ).name ).to eq 'metre raised to -1'
+          expect((metre ** -2      ).name ).to eq 'per metre squared'
+          expect((metre ** -1      ).name ).to eq 'per metre'
           expect((metre **  0      ).name ).to eq 'metre raised to 0'
           expect((metre **  1      ).name ).to eq 'metre'
           expect((metre **  2      ).name ).to eq 'metre squared'
@@ -125,7 +126,7 @@ module SI
 
         it 'can power itself to unitless quantity value' do
           expect(metre ** two).to eq (metre ** 2)
-          expect(psi ** two  ).to eq (psi ** 2)
+          expect(psi   ** two).to eq (psi   ** 2)
         end
 
         it 'raises Type Error when powered to non Numeric' do
