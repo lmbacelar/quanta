@@ -48,6 +48,14 @@ module SI
       end
 
       context 'Inspection' do
+        it 'knows if it is plain' do
+          expect(metre).to be_plain
+        end
+
+        it 'knows if it is composite' do
+          expect(metre).not_to be_composite
+        end
+
         it 'knows if it is a prefixed unit' do
           expect(metre    ).not_to be_prefixed
           expect(milimetre).to     be_prefixed

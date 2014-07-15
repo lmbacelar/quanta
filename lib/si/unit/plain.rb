@@ -25,6 +25,14 @@ module SI
         new :"", '', 1.0, ISQ::Quantity.dimension_one
       end
       
+      def plain?
+        true
+      end
+
+      def composite?
+        false
+      end
+
       def prefixed?
         !!prefix
       end
