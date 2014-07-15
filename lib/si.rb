@@ -13,12 +13,20 @@ module SI
     units.select(&:derived?)
   end
 
+  def plain_units
+    units.select(&:plain?)
+  end
+
+  def composite_units?
+    units.select(&:composite?)
+  end
+
   def prefixed_units
-    units.select(&:prefixed?)
+    plain_units.select(&:prefixed?)
   end
 
   def unprefixed_units
-    units.select(&:unprefixed?)
+    plain_units.select(&:unprefixed?)
   end
 
   def add_prefix label, symbol=nil, factor=nil, options={}
@@ -35,15 +43,27 @@ module SI
     found_unit = find_unit(prefixed_unit)
     return found_unit if found_unit
 
-    prefix, unit = split_prefix_and_unit_by(:label, prefixed_unit) ||
-                   split_prefix_and_unit_by(:name,  prefixed_unit)
+    prefix, unit = split_prefix_and_unit prefixed_unit
     raise TypeError, "unknown prefixed unit '#{prefixed_unit}'" unless prefix && unit
     Unit::Plain.new(unit.label, unit.name, unit.factor, unit.quantity, 
                     symbol: unit.symbol, prefix: prefix).tap { |u| @units << u }
   end
 
+  def add_composite_unit composite_unit
+    found_unit = find_unit(composite_unit)
+    return found_unit if found_unit
+
+    units = composite_unit.to_s.split('/').map{ |unit| unit.empty? ? nil : unit }
+    units = units[0] && units[0].split('.').map{ |u| unit_power_hash u               }, 
+            units[1] && units[1].split('.').map{ |u| unit_power_hash u, invert: true }
+    Unit::Composite.new(nil, nil, *units.compact.flatten).tap{ |u| @units << u }
+  end
+
   def unit_for unit
-    find_unit unit or add_prefixed_unit unit
+    found_unit = find_unit(unit)
+    return found_unit if found_unit
+    return add_prefixed_unit(unit) rescue TypeError 
+    add_composite_unit(unit)
   end
 
   def prefix_for prefix
@@ -101,13 +121,18 @@ module SI
   end
 
   def find_unit unit
-    case unit
-      when Unit::Plain    then unit if units.find{ |u| u.equal? unit }
-      when Symbol, String then units.find{ |u| u.label == unit.to_sym ||
-                                               u.name.upcase == unit.to_s.upcase || 
-                                               u.symbol      == unit.to_s }
-      else raise TypeError, 'unit must be a unit, name or symbol'
+    if unit.is_a? Unit
+      units.find{ |u| u.equal? unit }
+    elsif unit.is_a?(String) || unit.is_a?(Symbol)
+      units.find{ |u| u.label == unit.to_sym || u.name.upcase == unit.to_s.upcase }
+    else
+      raise TypeError, 'unit must be a unit, name or symbol'
     end
+  end
+
+  def split_prefix_and_unit unit
+    split_prefix_and_unit_by(:label, unit) or
+    split_prefix_and_unit_by(:name,  unit)
   end
 
   def split_prefix_and_unit_by attribute, unit
@@ -119,9 +144,25 @@ module SI
       end
     end
     return nil unless found_prefix
+    return nil if unit.empty? 
     found_unit = unprefixed_units.find{ |u| u.send(attribute).to_s == unit}
     return nil unless found_unit
     return found_prefix, found_unit
+  end
+
+  def unit_power_hash unit_power, invert: false
+    unit  = unit_power.tr('⁰¹²³⁴⁵⁶⁷⁸⁹',  '').to_sym
+    power = unit_power.tr '^⁰¹²³⁴⁵⁶⁷⁸⁹', ''
+    if power.empty?
+      power = 1
+    else
+      power = power.chars.map do |c|
+        { '⁰'=>'0', '¹'=>'1', '²'=>'2', '³'=>'3', '⁴'=>'4', 
+          '⁵'=>'5', '⁶'=>'6', '⁷'=>'7', '⁸'=>'8', '⁹'=>'9' }[c]
+      end.join.to_i
+    end
+    power = -power if invert
+    { find_unit(unit) => power }
   end
 
   def load_base_prefixes!
@@ -146,6 +187,8 @@ module SI
 
   def load_derived_units!
     DERIVED_UNITS.each { |args| add_unit *args }
+    add_composite_unit :m²
+    add_composite_unit :m³
   end
 
   def load_accepted_units!
@@ -205,7 +248,8 @@ module SI
     [ :K,   'Kelvin',         1.0,            :temperature                                ],
     [ :cd,  'candela',        1.0,            :luminous_intensity                         ],
     [ :mol, 'mole',           1.0,            :amount_of_substance                        ],
-    [ :bit, 'bit',            1.0,            :information                                ]
+    [ :bit, 'bit',            1.0,            :information                                ],
+    [ :"",  '',               1.0,            :dimension_one,          symbol: ''         ]
   ]
 
   DERIVED_UNITS =
@@ -231,9 +275,7 @@ module SI
     [ :T,   'Tesla',          1.0,            :magnetic_flux_density                      ],
     [ :V,   'Volt',           1.0,            :electric_potential_difference              ],
     [ :W,   'Watt',           1.0,            :power                                      ],
-    [ :Wb,  'Weber',          1.0,            :magnetic_flux                              ],
-    [ :m²,  'squared metre',  1.0,            :area                                       ],
-    [ :m³,  'cubic metre',    1.0,            :volume                                     ]
+    [ :Wb,  'Weber',          1.0,            :magnetic_flux                              ]
   ]
 
   ACCEPTED_UNITS =

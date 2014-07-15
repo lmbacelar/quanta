@@ -1,9 +1,9 @@
 require_relative '../lib/si'
 require_relative '../lib/isq'
-require_relative 'examples/si/units/plain'
+require_relative 'examples/si/units/composite'
 
 describe SI do
-  include_context :plain_unit_examples
+  include_context :composite_unit_examples
 
   context 'Properties' do
     it 'should have a label, a name, a collection of prefixes, a collection of units and a system of quantities' do
@@ -24,8 +24,8 @@ describe SI do
     it 'knows how to create itself according to the International System of Units' do
       expect(SI.prefixes.count      ).to eq 28
       expect(SI.base_units.count    ).to be 8
-      expect(SI.derived_units.count ).to be 157
-      expect(SI.units.count         ).to be 165
+      expect(SI.derived_units.count ).to be 158
+      expect(SI.units.count         ).to be 166
       expect(SI.isq).to eq ISQ
     end
 
@@ -80,6 +80,17 @@ describe SI do
         expect{ SI.add_prefixed_unit :milimetre }.to change{ SI.units.count }.by 1
         expect( SI.units.map &:label ).to include :mm
       end
+
+      it 'allows individual addition of composite units for existing plain units' do
+        SI.load_prefixes!
+        SI.load_units! :base
+        expect{ SI.add_composite_unit :"kg.m" }.to change{ SI.units.count }.by(1)
+        expect( SI.units.map{ |u| u.label }   ).to include :"kg.m"
+        expect{ SI.add_composite_unit :"kg.m/s²" }.to change{ SI.units.count }.by(1)
+        expect( SI.units.map{ |u| u.label }   ).to include :"kg.m/s²"
+        expect{ SI.add_composite_unit :"/s" }.to change{ SI.units.count }.by(1)
+        expect( SI.units.map{ |u| u.label }   ).to include :"/s"
+      end
     end
 
     context 'on a populated SI' do
@@ -98,6 +109,11 @@ describe SI do
         expect{ SI.add_prefixed_unit :milimetre }.not_to change{ SI.units.count }
       end
 
+      it 'does not add already existing composite unit' do
+        SI.add_composite_unit :"kg.m/s²"
+        expect{ SI.add_composite_unit :"kg.m/s²" }.not_to change{ SI.units.count }
+      end
+
       it 'does not prefix already prefixed unit' do
         SI.add_prefixed_unit :milimetre
         expect{ SI.add_prefixed_unit :kilomilimetre }.to raise_error TypeError
@@ -111,6 +127,10 @@ describe SI do
       it 'dynamically adds unexisting prefixed units when first accessed' do
         expect{ SI.unit_for :milimetre }.to change{ SI.units.count }.by(1)
         expect{ SI.unit_for :mg        }.to change{ SI.units.count }.by(1)
+      end
+
+      it 'dynamically adds unexisting composite units when first accessed' do
+        expect{ SI.unit_for :"kg.m/s²" }.to change{ SI.units.count }.by(1)
       end
     end
   end
@@ -132,8 +152,9 @@ describe SI do
     end
 
     it 'returns units using dynamic finders' do
-      expect(SI.metre).to eq SI.unit_for :metre
-      expect(SI.micro).to eq SI.prefix_for :micro
+      expect(SI.metre    ).to eq SI.unit_for   :metre
+      expect(SI.milimetre).to eq SI.unit_for   :milimetre
+      expect(SI.micro    ).to eq SI.prefix_for :micro
     end
 
     it 'raises TypeError for unknown unit' do
