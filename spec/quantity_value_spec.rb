@@ -1,4 +1,6 @@
 require_relative 'examples/quantity_values'
+require_relative '../lib/isq'
+require_relative '../lib/si'
 
 describe QuantityValue do
   include_context :quantity_value_examples
@@ -6,11 +8,11 @@ describe QuantityValue do
   context 'Creation' do
     it 'should have a value and a unit' do
       expect(one_metre.value     ).to eq 1
-      expect(one_metre.unit      ).to eq metre
+      expect(one_metre.unit      ).to eq SI.unit_for :m
     end
 
     it 'raises Type Error for non numeric :value' do
-      expect{ QuantityValue.new 'non numeric', metre}.to raise_error TypeError
+      expect{ QuantityValue.new 'non numeric', :m }.to raise_error TypeError
     end
 
     it 'should be immutable' do
@@ -42,9 +44,8 @@ describe QuantityValue do
     end
 
     it 'can compare itself to other values of same unit and different prefix' do
-      one_thousand_metres = QuantityValue.new 1000, metre
-      expect(one_kilometre <=> one_metre          ).to eq 1
-      expect(one_kilometre <=> one_thousand_metres).to eq 0
+      expect(one_kilometre <=> one_metre                  ).to eq 1
+      expect(one_kilometre <=> QuantityValue.new(1000, :m)).to eq 0
     end
 
     it 'can compare itself to other values of different unit and prefix' do
@@ -67,25 +68,25 @@ describe QuantityValue do
 
   context 'Addition and Subtraction' do
     it 'can add quantity values of the same unit and prefix' do
-      expect(one_metre  + two_metres).to eq QuantityValue.new 3, metre
-      expect(two_metres + one_metre ).to eq QuantityValue.new 3, metre
+      expect(one_metre  + two_metres).to eq three_metres
+      expect(two_metres + one_metre ).to eq three_metres
     end
 
     it 'can add quantity values of the same unit and different prefix' do
-      expect(one_metre + one_kilometre).to eq QuantityValue.new  1001, metre
-      expect(one_kilometre + one_metre).to eq QuantityValue.new 1.001, kilometre
+      expect(one_metre + one_kilometre).to eq QuantityValue.new  1001, :m
+      expect(one_kilometre + one_metre).to eq QuantityValue.new 1.001, :km
     end
 
     it 'can add quantity values of different unit and prefix' do
       expect(
         (one_kilometre + one_microinch).between?(
-          QuantityValue.new(1.0000000000253999, kilometre),
-          QuantityValue.new(1.0000000000254001, kilometre))
+          QuantityValue.new(1.0000000000253999, :km),
+          QuantityValue.new(1.0000000000254001, :km))
       ).to be_true
     end
 
     it 'can add quantity values of the same unit and different prefix' do
-      expect(one_kilometre - one_metre).to eq QuantityValue.new  999, metre
+      expect(one_kilometre - one_metre).to eq QuantityValue.new  999, :m
     end
 
     it 'raises TypeError when added by non quantity value' do
@@ -97,8 +98,8 @@ describe QuantityValue do
     end
 
     it 'can subtract quantity values of the same unit and prefix' do
-      expect(one_metre - zero_metres).to eq QuantityValue.new 1, metre
-      expect(one_metre - one_metre  ).to eq QuantityValue.new 0, metre
+      expect(one_metre - zero_metres).to eq one_metre
+      expect(one_metre - one_metre  ).to eq zero_metres
     end
 
     it 'raises TypeError when subtracted by non quantity value' do
@@ -174,6 +175,19 @@ describe QuantityValue do
     it 'raises TypeError when divided by non-numeric' do
       expect{ one_metre / 'not a number' }.to raise_error TypeError
     end
+  end
 
+  context 'Conversion' do
+    it 'converts itself to quantity values of the same quantity' do
+      expect( one_metre.to :mm                                 ).to eq QuantityValue.new 1000, :mm
+      expect( QuantityValue.new(1, :in).to :mm                 ).to eq QuantityValue.new 25.4, :mm
+      expect( QuantityValue.new(1, :bar).to :mmHg              ).to eq QuantityValue.new 100000.0/133.32222, :mmHg
+      expect( one_kilogram*one_metre / (one_second*one_second) ).to eq QuantityValue.new 1, :N
+    end
+
+    it 'dynamically converts itself to other units of the same quantity' do
+      expect( one_metre.to_mm        ).to eq QuantityValue.new 1000, :mm
+      expect( one_metre.to_milimetre ).to eq QuantityValue.new 1000, :mm
+    end
   end
 end
