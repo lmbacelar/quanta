@@ -44,6 +44,18 @@ module SI
           expect(a_hash[newton.clone]).to eq :hash_value
         end
       end
+
+      context 'Inspection' do
+        it 'knows if it is plain' do
+          expect(metre ).to     be_plain
+          expect(newton).not_to be_plain
+        end
+
+        it 'knows if it is composite' do
+          expect(metre ).not_to be_composite
+          expect(newton).to     be_composite
+        end
+      end
     end
   end
 end
