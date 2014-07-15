@@ -32,6 +32,13 @@ module SI
       end
 
       context 'Comparison' do
+        it 'is identity equal only to units with the same label, name and units' do
+          expect(newton.clone ).to     equal newton
+          expect(squared_metre).not_to equal metre
+          expect(cubic_metre  ).not_to equal squared_metre
+          expect(psi          ).not_to equal pascal
+        end
+
         it 'implements hash equality based on label, name and units' do
           a_hash = { newton => :hash_value }
           expect(a_hash[newton.clone]).to eq :hash_value

@@ -18,6 +18,8 @@ module SI
       let(:are        ) { Plain.new :a,   'are',            100.0,      area                       }
       let(:second     ) { Plain.new :s,   'second',         1.0,        time                       }
       let(:hertz      ) { Plain.new :Hz,  'Hertz',          1.0,        frequency                  }
+      let(:bequerel   ) { Plain.new :Bq,  'Bequerel',       1.0,        frequency                  }
+      let(:hertz      ) { Plain.new :Hz,  'Hertz',          1.0,        frequency                  }
       let(:kelvin     ) { Plain.new :K,   'Kelvin',         1.0,        temperature                }
       let(:celsius    ) { Plain.new :ºC,  'degree Celsius', 1.0,        temperature, scale: 273.15 }
       let(:percent    ) { Plain.new :pct, '%',              1.0e-2,     dimension_one              }

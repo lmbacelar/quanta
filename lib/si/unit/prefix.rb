@@ -16,6 +16,10 @@ module SI
 
       alias_method :to_s, :symbol
 
+      def equal? other
+        hash == other.hash
+      end
+
       def <=> other
         return nil unless other.is_a? self.class
         factor <=> other.factor 

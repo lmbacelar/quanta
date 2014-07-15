@@ -7,6 +7,10 @@ module SI
 
       include Comparable
 
+      def equal? other
+        hash == other.hash
+      end
+
       def <=> other
         return nil unless other.is_a? Unit
         quantity.same_kind_as?(other.quantity) && factor <=> other.factor

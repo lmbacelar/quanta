@@ -39,6 +39,11 @@ module SI
       end
 
       context 'Comparison' do
+        it 'is identity equal only to prefixes with the same label, factor, name and symbol' do
+          expect(mili.clone).to     equal mili
+          expect(kilo      ).not_to equal micro
+        end
+
         it 'can compare itself to other prefixes' do
           other_mili = mili.clone
           expect(mili <=> micro     ).to eq  1 
