@@ -52,11 +52,22 @@ module SI
           expect(metre    ).not_to be_prefixed
           expect(milimetre).to     be_prefixed
         end
+
+        it 'knows if it is a unprefixed unit' do
+          expect(metre    ).to     be_unprefixed
+          expect(milimetre).not_to be_unprefixed
+        end
       end
 
       context 'Comparison' do
-        it 'equals units of same quantity, same factor, different scale' do
+        it 'is numerically equal to units of same quantity, same factor, different scale' do
           expect(kelvin <=> celsius).to eq 0
+        end
+
+        it 'is identity equal only to units with the same label, name, symbol, factor, quantity' do
+          expect(metre.clone).to     equal metre
+          expect(hertz      ).not_to equal bequerel
+          expect(metre      ).not_to equal milimetre
         end
 
         it 'implements hash equality based on label, name, symbol, factors and quantity' do

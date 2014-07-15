@@ -28,6 +28,10 @@ module SI
       def prefixed?
         !!prefix
       end
+
+      def unprefixed?
+        !prefixed?
+      end
     end
   end
 end
