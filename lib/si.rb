@@ -13,49 +13,69 @@ module SI
     units.select(&:derived?)
   end
 
+  def prefixed_units
+    units.select(&:prefixed?)
+  end
+
+  def unprefixed_units
+    units.select(&:unprefixed?)
+  end
+
   def add_prefix label, symbol=nil, factor=nil, options={}
-    return prefix_for(label) rescue TypeError
-    @prefixes << prefix = Unit::Prefix.new(label, symbol, factor, options)
-    prefix
+    find_prefix(label) or
+    Unit::Prefix.new(label, symbol, factor, options).tap{ |p| @prefixes << p }
   end
 
   def add_unit label, symbol=nil, factor=nil, quantity=nil, options={}
-    return unit_for(label) rescue TypeError
-    @units << unit = Unit::Plain.new(label, symbol, factor, isq.quantity_for(quantity), options)
-    unit
+    find_unit(label) or
+    Unit::Plain.new(label, symbol, factor, isq.quantity_for(quantity), options).tap { |u| @units << u }
+  end
+
+  def add_prefixed_unit prefixed_unit
+    found_unit = find_unit(prefixed_unit)
+    return found_unit if found_unit
+
+    prefix, unit = split_prefix_and_unit_by(:label, prefixed_unit) ||
+                   split_prefix_and_unit_by(:name,  prefixed_unit)
+    raise TypeError, "unknown prefixed unit '#{prefixed_unit}'" unless prefix && unit
+    Unit::Plain.new(unit.label, unit.name, unit.factor, unit.quantity, 
+                    symbol: unit.symbol, prefix: prefix).tap { |u| @units << u }
+  end
+
+  def unit_for unit
+    find_unit unit or add_prefixed_unit unit
+  end
+
+  def prefix_for prefix
+    find_prefix prefix or raise TypeError, "unknown prefix '#{prefix}'"
+  end
+
+  def clear!
+    @label, @name, @isq = nil
+    @prefixes, @units   = [], []
+  end
+
+  def load!
+    clear!
+    @isq = ISQ.load!
+    load_prefixes! :all
+    load_units! :all
+  end
+
+  def load_prefixes! subset = :all
+    load_base_prefixes!   if subset == :all || subset == :base
+    load_binary_prefixes! if subset == :all || subset == :binary
+  end
+
+  def load_units! subset = :all
+    load_base_units!     if subset == :all || subset == :base
+    load_derived_units!  if subset == :all || subset == :derived
+    load_accepted_units! if subset == :all || subset == :accepted
+    load_non_si_units!   if subset == :all || subset == :non_si
   end
 
   def configure(&block)
     instance_eval(&block) if block
-  end
-
-  def prefix_for prefix
-    prf = case prefix
-            when Unit::Prefix   then prefix if prefixes.include? prefix
-            when Symbol, String then prefixes.select{ |p| p.label == prefix.to_sym ||
-                                                       p.name.upcase == prefix.to_s.upcase || 
-                                                       p.symbol      == prefix.to_s }.first
-            else raise TypeError, 'prefix must be a prefix, name or symbol'
-          end
-    return prf if prf
-    raise TypeError, "unknown prefix '#{prefix}'"
-  end
-
-  def unit_for unit
-    unt = case unit
-            when Unit::Plain    then unit if units.include? unit
-            when Symbol, String then units.select{ |u| u.label == unit.to_sym ||
-                                                    u.name.upcase == unit.to_s.upcase || 
-                                                    u.symbol      == unit.to_s }.first
-            else raise TypeError, 'unit must be a unit, name or symbol'
-          end
-    return unt if unt
-    raise TypeError, "unknown unit '#{unit}'"
-  end
-
-  def unit_or_prefix_for method, *args, &block
-    return self.unit_for(  method) rescue TypeError
-    return self.prefix_for(method)
   end
 
   def respond_to? method, include_private = false
@@ -64,62 +84,108 @@ module SI
   end
 
   def method_missing method, *args, &block
-    return unit_or_prefix_for(method) rescue TypeError
+    return unit_or_prefix_for method rescue TypeError
     super
   end
 
-  def clear!
-    @label, @name, @isq = nil, nil, nil
-    @prefixes, @units   = [],  []
+
+  protected
+  def find_prefix prefix
+    case prefix
+      when Unit::Prefix   then prefix if prefixes.find{ |p| p.equal? prefix }
+      when Symbol, String then prefixes.find{ |p| p.label == prefix.to_sym ||
+                                               p.name.upcase == prefix.to_s.upcase || 
+                                               p.symbol      == prefix.to_s }
+      else raise TypeError, 'prefix must be a prefix, name or symbol'
+    end
   end
 
-  def load!
-    clear!
-    @isq = ISQ.load!
-    load_si_prefixes
-    load_si_units
+  def find_unit unit
+    case unit
+      when Unit::Plain    then unit if units.find{ |u| u.equal? unit }
+      when Symbol, String then units.find{ |u| u.label == unit.to_sym ||
+                                               u.name.upcase == unit.to_s.upcase || 
+                                               u.symbol      == unit.to_s }
+      else raise TypeError, 'unit must be a unit, name or symbol'
+    end
   end
 
-  def load_si_prefixes
-    SI_PREFIXES.each        { |args| add_prefix *args }
-    SI_BINARY_PREFIXES.each { |args| add_prefix *args }
+  def split_prefix_and_unit_by attribute, unit
+    unit = unit.to_s
+    found_prefix = prefixes.each do |prefix|
+      if unit.start_with? prefix.send(attribute).to_s
+        unit.slice! prefix.send(attribute).to_s 
+        break prefix
+      end
+    end
+    return nil unless found_prefix
+    found_unit = unprefixed_units.find{ |u| u.send(attribute).to_s == unit}
+    return nil unless found_unit
+    return found_prefix, found_unit
   end
 
-  def load_si_units
-    SI_BASE_UNITS.each    { |args| add_unit *args }
-    SI_DERIVED_UNITS.each { |args| add_unit *args }
-    NON_SI_ACCEPTED_UNITS.each { |args| add_unit *args }
+  def load_base_prefixes!
+    BASE_PREFIXES.each { |args| add_prefix *args }
+  end
+  
+  def load_binary_prefixes!
+    BINARY_PREFIXES.each { |args| add_prefix *args }
+  end
+
+  def load_base_units!
+    BASE_UNITS.each { |args| add_unit *args }
+    # 
+    # kilogram is a special case as it is the base unit and it is prefixed
+    # as a consequence, gram also has to be manually added to allow for its
+    # prefixed versions
+    #
+    kilo = find_prefix :kilo
+    add_unit :g, 'gram', 1.0e-3, :mass
+    add_prefixed_unit :kg
+  end
+
+  def load_derived_units!
+    DERIVED_UNITS.each { |args| add_unit *args }
+  end
+
+  def load_accepted_units!
+    ACCEPTED_UNITS.each { |args| add_unit *args }
+  end
+
+  def load_non_si_units!
     NON_SI_UNITS.each { |args| add_unit *args }
   end
 
-  #
-  # International System of Units (SI) Constants
-  #
-  SI_PREFIXES =
+  def unit_or_prefix_for method, *args, &block
+    return unit_for method rescue TypeError
+    prefix_for method
+  end
+
+  BASE_PREFIXES =
   [
-    [ :Y,  'yotta', 10**24  ],
-    [ :Z,  'zetta', 10**21  ],
-    [ :E,  'exa',   10**18  ],
-    [ :P,  'peta',  10**15  ],
-    [ :T,  'tera',  10**12  ],
-    [ :G,  'giga',  10**9   ],
-    [ :M,  'mega',  10**6   ],
-    [ :k,  'kilo',  10**3   ],
-    [ :h,  'hecto', 10**2   ],
-    [ :da, 'deca',  10**1   ],
-    [ :d,  'deci',  10**-1  ],
-    [ :c,  'centi', 10**-2  ],
-    [ :m,  'mili',  10**-3  ],
-    [ :µ,  'micro', 10**-6  ],
-    [ :n,  'nano',  10**-9  ],
-    [ :p,  'pico',  10**-12 ],
-    [ :f,  'femto', 10**-15 ],
-    [ :a,  'atto',  10**-18 ],
-    [ :z,  'zepto', 10**-21 ],
-    [ :y,  'yocto', 10**-24 ]
+    [ :Y,  'yotta', 1.0e24  ],
+    [ :Z,  'zetta', 1.0e21  ],
+    [ :E,  'exa',   1.0e18  ],
+    [ :P,  'peta',  1.0e15  ],
+    [ :T,  'tera',  1.0e12  ],
+    [ :G,  'giga',  1.0e9   ],
+    [ :M,  'mega',  1.0e6   ],
+    [ :k,  'kilo',  1.0e3   ],
+    [ :h,  'hecto', 1.0e2   ],
+    [ :da, 'deca',  1.0e1   ],
+    [ :d,  'deci',  1.0e-1  ],
+    [ :c,  'centi', 1.0e-2  ],
+    [ :m,  'mili',  1.0e-3  ],
+    [ :µ,  'micro', 1.0e-6  ],
+    [ :n,  'nano',  1.0e-9  ],
+    [ :p,  'pico',  1.0e-12 ],
+    [ :f,  'femto', 1.0e-15 ],
+    [ :a,  'atto',  1.0e-18 ],
+    [ :z,  'zepto', 1.0e-21 ],
+    [ :y,  'yocto', 1.0e-24 ]
   ]
 
-  SI_BINARY_PREFIXES =
+  BINARY_PREFIXES =
   [
     [ :Yi, 'yobi', 2**80 ],
     [ :Zi, 'zebi', 2**70 ],
@@ -131,10 +197,9 @@ module SI
     [ :Ki, 'kibi', 2**10 ]
   ]
 
-  SI_BASE_UNITS =
+  BASE_UNITS =
   [
     [ :m,   'metre',          1.0,            :length                                     ],
-    [ :kg,  'kilogram',       1.0,            :mass                                       ],
     [ :s,   'second',         1.0,            :time                                       ],
     [ :A,   'Ampere',         1.0,            :electric_current                           ],
     [ :K,   'Kelvin',         1.0,            :temperature                                ],
@@ -143,7 +208,7 @@ module SI
     [ :bit, 'bit',            1.0,            :information                                ]
   ]
 
-  SI_DERIVED_UNITS =
+  DERIVED_UNITS =
   [
     [ :Bq,  'Bequerel',       1.0,            :radioactivity                              ],
     [ :ºC,  'degree Celsius', 1.0,            :temperature,            scale: 273.15      ],
@@ -171,10 +236,7 @@ module SI
     [ :m³,  'cubic metre',    1.0,            :volume                                     ]
   ]
 
-  #
-  # Non SI units
-  #
-  NON_SI_ACCEPTED_UNITS =
+  ACCEPTED_UNITS =
   [
     [ :min,            'minute',                       60.0,             :time                                   ],
     [ :h,              'hour',                         3_600.0,          :time                                   ],

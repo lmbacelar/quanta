@@ -24,9 +24,17 @@ describe SI do
     it 'knows how to create itself according to the International System of Units' do
       expect(SI.prefixes.count      ).to eq 28
       expect(SI.base_units.count    ).to be 8
-      expect(SI.derived_units.count ).to be 156
-      expect(SI.units.count         ).to be 164
+      expect(SI.derived_units.count ).to be 157
+      expect(SI.units.count         ).to be 165
       expect(SI.isq).to eq ISQ
+    end
+
+    it 'accounts kilogram as a base unit' do
+      expect(SI.kilogram).to be_base
+    end
+
+    it 'does not account gram as a base unit' do
+      expect(SI.gram).not_to be_base
     end
   end
 
@@ -44,36 +52,66 @@ describe SI do
   end
 
   context 'Addition' do
-    before(:each) { SI.clear! }
+    context 'on an empty SI' do
+      before(:each) do
+        SI.clear!
+        SI.isq = ISQ.load!
+      end
 
-    it 'allows individual addition of prefixes' do
-      expect{ SI.add_prefix :mili, 'm', 1.0e-3 }.to change{ SI.prefixes.count }.by 1
-    end
-    
-    it 'allows bulk addition of prefixes' do
-      expect {
-        SI.configure do
-          add_prefix :mili,  'm',     1.0e-3
-        end
-      }.to change{ SI.prefixes.count }.by 1
+      it 'allows individual addition of prefixes' do
+        expect{ SI.add_prefix :mili, 'm', 1.0e-3 }.to change{ SI.prefixes.count }.by 1
+      end
+      
+      it 'allows bulk addition of prefixes' do
+        expect {
+          SI.configure do
+            add_prefix :mili,  'm',     1.0e-3
+          end
+        }.to change{ SI.prefixes.count }.by 1
+      end
+
+      it 'allows individual addition of units' do
+        expect{ SI.add_unit :m, 'metre', 1.0, :length }.to change{ SI.units.count }.by 1
+      end
+
+      it 'allows individual addition of prefixed unit for existing prefix, unit' do
+        SI.add_unit   :m, 'metre', 1.0,   :length
+        SI.add_prefix :m, 'mili',  1.0e-3
+        expect{ SI.add_prefixed_unit :milimetre }.to change{ SI.units.count }.by 1
+        expect( SI.units.map &:label ).to include :mm
+      end
     end
 
-    it 'does not add already existing prefixes' do
-      SI.add_prefix :mili, 'm', 1.0e-3
-      expect{ SI.add_prefix :mili, 'm', 1.0e-3 }.not_to change{ SI.prefixes.count }
-    end
+    context 'on a populated SI' do
+      before(:each) { SI.load! }
 
-    it 'allows individual addition of units' do
-      SI.isq = ISQ.load!
-      ISQ.add :length, nil
-      expect{ SI.add_unit :m, 'metre', 1.0, :length }.to change{ SI.units.count }.by 1
-    end
+      it 'does not add already existing prefixes' do
+        expect{ SI.add_prefix :mili, 'm', 1.0e-3 }.not_to change{ SI.prefixes.count }
+      end
 
-    it 'does not add already existing units' do
-      SI.isq = ISQ.load!
-      ISQ.add :length, nil
-      SI.add_unit :m, 'metre', 1.0, :length
-      expect{ SI.add_unit :m, 'metre', 1.0, :length }.not_to change{ SI.units.count }
+      it 'does not add already existing units' do
+        expect{ SI.add_unit :m, 'metre', 1.0, :length }.not_to change{ SI.units.count }
+      end
+
+      it 'does not add already existing prefixed unit' do
+        SI.add_prefixed_unit :milimetre
+        expect{ SI.add_prefixed_unit :milimetre }.not_to change{ SI.units.count }
+      end
+
+      it 'does not prefix already prefixed unit' do
+        SI.add_prefixed_unit :milimetre
+        expect{ SI.add_prefixed_unit :kilomilimetre }.to raise_error TypeError
+        expect{ SI.add_prefixed_unit :milikilogram  }.to raise_error TypeError
+      end
+
+      it 'prefixes gram' do
+        expect{ SI.add_prefixed_unit :miligram }.to change{ SI.units.count }.by(1)
+      end
+
+      it 'dynamically adds unexisting prefixed units when first accessed' do
+        expect{ SI.unit_for :milimetre }.to change{ SI.units.count }.by(1)
+        expect{ SI.unit_for :mg        }.to change{ SI.units.count }.by(1)
+      end
     end
   end
 
