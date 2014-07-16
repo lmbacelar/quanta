@@ -41,6 +41,16 @@ describe Quanta::SI::Unit::Arithmetic do
       expect((pound_force / squared_inch).name ).to eq 'pound force per squared inch'
     end
 
+    xit 'groups numerator, denominator units on label, name of multiplication result' do
+      expect((metre_per_second * metre).label).to eq :"m²/s"
+      expect((metre_per_second * metre).name ).to eq 'metre squared per second'
+    end
+
+    xit 'groups numerator, denominator units on label, name of division result' do
+      expect((metre_per_second / second).label).to eq :"m/s²"
+      expect((metre_per_second / second).name ).to eq 'metre per second squared'
+    end
+
     it 'can multiply itself by other unit' do
       expect((inch * second).factor             ).to eq inch.factor * second.factor
       expect(metre * metre                      ).to be_same_kind_as are

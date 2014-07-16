@@ -27,6 +27,7 @@ module Quanta
     let(:one_second           ) { QuantityValue.new 1, :s                 }
     let(:one_hertz            ) { QuantityValue.new 1, :Hz                }
     let(:one_squared_metre    ) { QuantityValue.new 1, :m²                }
+    let(:one_cubic_metre      ) { QuantityValue.new 1, :m³                }
     let(:one_squared_kilometre) { QuantityValue.new 1, :km²               }
     let(:one_metre_second     ) { QuantityValue.new 1, :"m.s"             }
     let(:one_metre_per_second ) { QuantityValue.new 1, :"m/s"             }
