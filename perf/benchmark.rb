@@ -3,8 +3,8 @@ require 'benchmark'
 
 puts '---------------------------------------------------------------------------------------------'
 puts '  Benchmarking ISQ'
-puts '    - quantities:     { Quantity => Numeric }'
-puts '    - ISQ.quantities: []'
+puts '    - quantities:     { Symbol => Numeric }'
+puts '    - ISQ.quantities: {}'
 puts '---------------------------------------------------------------------------------------------'
 Benchmark.bm(30) do |bm|
   bm.report 'loading ISQ' do
@@ -14,23 +14,17 @@ Benchmark.bm(30) do |bm|
   end
 
   Quanta::ISQ.load!
-  bm.report 'retrieval by quantity' do
-    500.times do
-      quantity = Quanta::ISQ.quantities.sample
-      Quanta::ISQ.quantity_for quantity
-    end
-  end
-
+  quantities = Quanta::ISQ.quantities.values
   bm.report 'retrieval by label' do
     500.times do
-      quantity = Quanta::ISQ.quantities.sample
-      Quanta::ISQ.quantity_for quantity.quantity
+      quantity = quantities.sample
+      Quanta::ISQ.quantity_for quantity.label
     end
   end
 
   bm.report 'retrieval by name' do
     500.times do
-      quantity = Quanta::ISQ.quantities.sample
+      quantity = quantities.sample
       Quanta::ISQ.quantity_for quantity.name
     end
   end
