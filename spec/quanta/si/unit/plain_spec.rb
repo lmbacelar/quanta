@@ -25,13 +25,13 @@ module Quanta
             expect(milimetre.prefix  ).to eq mili
           end
 
-          it 'defaults name and symbol to label, factor to 1.0, scale to 0.0, quantity to base, and prefix to nil' do
+          it 'defaults name and symbol to label, factor to 1.0, scale to 0.0, quantity to one, and prefix to nil' do
             unit = Plain.new :a_label
             expect(unit.name    ).to eq ''
             expect(unit.symbol  ).to eq 'a label'
             expect(unit.factor  ).to eq 1.0
             expect(unit.scale   ).to eq 0.0
-            expect(unit.quantity).to eq ISQ::Quantity.new
+            expect(unit.quantity).to eq ISQ::Quantity.dimension_one
             expect(unit.prefix  ).to be_nil
           end
 

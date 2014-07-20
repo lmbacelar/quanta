@@ -7,7 +7,7 @@ module Quanta
 
         attr_reader :symbol, :prefix
 
-        def initialize label, name = '', factor = 1.0, quantity = ISQ::Quantity.new, options = {}
+        def initialize label, name = '', factor = 1.0, quantity = ISQ::Quantity.dimension_one, options = {}
           raise TypeError, 'factor must be numeric'      unless factor.is_a?   Numeric
           raise TypeError, 'quantity must be a quantity' unless quantity.is_a? ISQ::Quantity
           @prefix   = options.fetch(:prefix) { nil }
