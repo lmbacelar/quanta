@@ -5,15 +5,14 @@ module Quanta
   module ISQ
     class Quantity
       def self.dimension_one
-        Quantity.new :dimension_one, symbol: '1', dimensions: {}
+        Quantity.new :dimension_one, {}, symbol: '1'
       end
 
-      attr_accessor :label, :name, :symbol, :dimensions
-      def initialize label, 
-                     name:label.to_s.tr_s('_', '  '), 
-                     symbol: label.to_s.upcase, 
-                     dimensions: nil
-        @label, @name, @symbol = label.to_sym, name, symbol
+      attr_accessor :label, :dimensions, :name, :symbol
+      def initialize label, dimensions, options = {}
+        @label      = label.to_sym
+        @name       = options.fetch(:name)   { label.to_s.tr_s '_', '  ' }
+        @symbol     = options.fetch(:symbol) { label.to_s.upcase         }
         @dimensions = dimensions || { @label => 1 }
         raise TypeError, 'dimensions must be a hash' unless @dimensions.is_a? Hash
         freeze
@@ -76,7 +75,7 @@ module Quanta
         return self.clone             if other ==  1
 
         new_dimensions = Hash[dimensions.map{ |dim, pow| [dim, (pow * other).to_i] }].delete_if{ |_, pow| pow == 0 }
-        Quantity.new label_for(:**, other), dimensions: new_dimensions
+        Quantity.new label_for(:**, other), new_dimensions
       end
 
       def coerce other
@@ -95,7 +94,7 @@ module Quanta
         new_dimensions = dimensions.merge(other.dimensions) do |_, pow, other_pow|
           pow + other_pow
         end.delete_if{ |_, pow| pow == 0 }
-        Quantity.new label_for(operator, other), dimensions: new_dimensions
+        Quantity.new label_for(operator, other), new_dimensions
       end
 
       def label_for operator, other=nil

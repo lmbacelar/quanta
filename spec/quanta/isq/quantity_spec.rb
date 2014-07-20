@@ -15,7 +15,7 @@ module Quanta::ISQ
         end
 
         it 'defaults to base quantity, name to quantity, symbol to uppercase quantity' do
-          quantity = Quantity.new :some_quantity
+          quantity = Quantity.new :some_quantity, nil
           expect(quantity.label ).to eq :some_quantity
           expect(quantity.name  ).to eq 'some quantity'
           expect(quantity.symbol).to eq 'SOME_QUANTITY'
@@ -64,7 +64,7 @@ module Quanta::ISQ
         end
 
         it 'can compare itself to other derived quantities' do
-          other_velocity = Quantity.new :velocity, symbol: 'V', dimensions: { length: 1, time: -1 } 
+          other_velocity = Quantity.new :velocity, { length: 1, time: -1 }, symbol: 'V'
           expect(velocity).to     eq other_velocity
           expect(area    ).not_to eq other_velocity
         end
