@@ -1,25 +1,28 @@
+require_relative '../core_extensions/integer'
+require_relative '../core_extensions/numeric'
+
 module Quanta
   module ISQ
     class Quantity
       def self.dimension_one
-        Quantity.new :dimension_one, {}, symbol: '1'
+        Quantity.new :dimension_one, symbol: '1', dimensions: {}
       end
 
-      attr_accessor :quantity, :name, :symbol, :dimensions
-      def initialize quantity = nil, dimensions_or_quantity = nil, options = {}
-        @quantity   = quantity
-        @name       = options.fetch(:name)   { quantity.to_s.tr_s '_', '  ' }
-        @symbol     = options.fetch(:symbol) { quantity.to_s.upcase }
-        @dimensions = case dimensions_or_quantity 
-          when NilClass  then { self => 1 }
-          when Hash      then dimensions_or_quantity
-          when Quantity  then dimensions_or_quantity.dimensions
-          else raise TypeError, 'dimensions_or_quantity must be nil, a hash or a quantity'
-        end
+      attr_accessor :label, :name, :symbol, :dimensions
+      def initialize label, 
+                     name:label.to_s.tr_s('_', '  '), 
+                     symbol: label.to_s.upcase, 
+                     dimensions: nil
+        @label, @name, @symbol = label.to_sym, name, symbol
+        @dimensions = dimensions || { @label => 1 }
+        raise TypeError, 'dimensions must be a hash' unless @dimensions.is_a? Hash
         freeze
       end
 
       def to_s
+        #
+        # TODO: link to ISQ to extract each quantity's symbol
+        #
         return symbol if base?
         dimensions.map do |quantity, index|
           index == 1 ? quantity.symbol : "#{quantity.symbol}^#{index}"
@@ -27,7 +30,7 @@ module Quanta
       end
 
       def base?
-        dimensions == { self => 1 }
+        dimensions == { label => 1 }
       end
 
       def derived?
@@ -43,18 +46,20 @@ module Quanta
       end
 
       def hash
-        [Quantity, quantity, name, symbol].concat(
-          Array(dimensions).map { |dim, pow| [dim.quantity, dim.name, dim.symbol, pow] }
-        ).hash
+        [Quantity, label, name, symbol, dimensions].hash
       end
       alias_method :eql?, :==
 
       def same_kind_as? other
-        dimensions.hash == other.dimensions.hash
+        if base?
+          label == other.label
+        else
+          dimensions == other.dimensions
+        end
       end
 
       def reciprocal
-        Quantity.new nil, Hash[dimensions.map{ |k, v| [k, v*-1] }]
+        self ** -1
       end
 
       def * other
@@ -69,10 +74,9 @@ module Quanta
         raise TypeError unless other.is_a? Numeric
         return Quantity.dimension_one if other ==  0 || self.dimension_one?
         return self.clone             if other ==  1
-        return self.reciprocal        if other == -1
 
         new_dimensions = Hash[dimensions.map{ |dim, pow| [dim, (pow * other).to_i] }].delete_if{ |_, pow| pow == 0 }
-        Quantity.new nil, new_dimensions
+        Quantity.new label_for(:**, other), dimensions: new_dimensions
       end
 
       def coerce other
@@ -91,7 +95,16 @@ module Quanta
         new_dimensions = dimensions.merge(other.dimensions) do |_, pow, other_pow|
           pow + other_pow
         end.delete_if{ |_, pow| pow == 0 }
-        Quantity.new nil, new_dimensions
+        Quantity.new label_for(operator, other), dimensions: new_dimensions
+      end
+
+      def label_for operator, other=nil
+        case operator
+        when :*  then [self.label, other.label].sort.join('.').to_sym
+        when :/  then [self.label, other.label].sort.join('/').to_sym
+        when :** then [self.label, other.to_superscript].join.to_sym
+        else raise TypeError, 'unexpected operator'
+        end
       end
     end
   end
