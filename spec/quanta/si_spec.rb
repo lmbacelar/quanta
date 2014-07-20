@@ -159,7 +159,7 @@ module Quanta
       end
 
       it 'raises TypeError for unknown unit' do
-        qty  = ISQ::Quantity.new :qty
+        qty  = ISQ::Quantity.new :qty, nil
         unit = SI::Unit::Plain.new :unit, 'unit', 1.0, qty
         expect{ SI.unit_for unit   }.to raise_error TypeError
         expect{ SI.unit_for :unit  }.to raise_error TypeError
