@@ -35,8 +35,8 @@ module Quanta
 
     context 'Addition' do
       it 'allows individual addition of base or known quantities' do
-        expect{ ISQ.add :length,   nil,    symbol: 'L' }.to change{ ISQ.quantities.count }.by 1
-        expect{ ISQ.add :diameter, { length: 1 }       }.to change{ ISQ.quantities.count }.by 1
+        expect{ ISQ.add :length,   nil, symbol: 'L' }.to change{ ISQ.quantities.count }.by 1
+        expect{ ISQ.add :diameter, { length: 1 }    }.to change{ ISQ.quantities.count }.by 1
       end
 
       it 'allows bulk addition of quantities' do
@@ -48,7 +48,7 @@ module Quanta
       end
 
       it 'raises TypeError when adding quantity based on unkown quantities' do
-        expect{ ISQ.add :quantity, { unknown: 1 } }.to raise_error TypeError
+        expect{ ISQ.add :quantity, { unknown: 1 } }.to raise_error
       end
     end
 
@@ -56,10 +56,8 @@ module Quanta
       before(:each) { ISQ.load! }
       it 'returns quantity for known quantity' do
         mass = ISQ::Quantity.new :mass, nil, symbol: 'M'
-        expect(ISQ.quantity_for mass  ).to eq mass
         expect(ISQ.quantity_for :mass ).to eq mass
         expect(ISQ.quantity_for 'Mass').to eq mass
-        expect(ISQ.quantity_for 'M'   ).to eq mass
       end
 
       it 'returns quantities using dynamic finders' do
@@ -67,14 +65,9 @@ module Quanta
       end
 
       it 'raises TypeError for unknown quantity' do
-        unknown = ISQ::Quantity.new :unknown
-        expect{ ISQ.quantity_for unknown   }.to raise_error TypeError
+        unknown = ISQ::Quantity.new :unknown, nil
         expect{ ISQ.quantity_for :unknown  }.to raise_error TypeError
         expect{ ISQ.quantity_for 'Unknown' }.to raise_error TypeError
-      end
-
-      it 'raises TypeError for incorrect type of quantity' do
-        expect{ ISQ.quantity_for [] }.to raise_error TypeError
       end
     end
   end

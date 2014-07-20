@@ -2,14 +2,13 @@ module Quanta
   module ISQ
     extend self
     
-    @quantities = []
+    @quantities = {}
     attr_accessor :label, :name, :quantities
 
-    def add quantity, qtys, options = {}
-      # ensure each quantity in qtys exists in quantities
-      qtys = Hash[qtys.map{ |qty, pow| [quantity_for(qty), pow] }] unless qtys.nil?
-      @quantities << Quantity.new(quantity, qtys, options)
-      @quantities.last
+    def add label, qtys, options = {}
+      # ensure each qty in qtys exists in quantities
+      qtys.map{ |qty,_| quantities.fetch(qty) } if qtys
+      @quantities[label] = Quantity.new label, qtys, options
     end
 
     def configure(&block)
@@ -17,20 +16,14 @@ module Quanta
     end
 
     def quantity_for quantity
-      qty = case quantity
-              when Quantity then quantity if quantities.include? quantity
-              when Symbol   then quantities.select{ |q| q.quantity    == quantity }.first
-              when String   then quantities.select{ |q| q.quantity    == quantity.to_sym ||
-                                                        q.name.upcase == quantity.upcase || 
-                                                        q.symbol      == quantity }.first
-              else raise TypeError, ' quantity must be a quantity, name or symbol'
-            end
-      return qty if qty
+      quantities[quantity] ||
+      quantities.values.find{ |q| q.label       == quantity.to_sym ||
+                                  q.name.upcase == quantity.upcase    } or
       raise TypeError, "unknown quantity '#{quantity}'"
     end
 
     def base_quantities
-      quantities.select{ |quantity| quantity.base? }
+      quantities.select{ |_, quantity| quantity.base? }
     end
 
     def respond_to? method, include_private = false
@@ -45,7 +38,7 @@ module Quanta
 
     def clear!
       @label, @name = nil, nil
-      @quantities   = []
+      @quantities   = {}
     end
 
     def load!
