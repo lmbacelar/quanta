@@ -14,6 +14,16 @@ module Quanta
       end
     end
 
+    context 'Output' do
+      it 'returns symbol for known quantity' do
+        ISQ.load!
+        expect( ISQ.symbol_for :length    ).to eq 'L'
+        expect( ISQ.symbol_for :frequency ).to eq 'T⁻¹'
+        expect( ISQ.symbol_for :force     ).to eq 'L.M.T⁻²'
+        expect( ISQ.symbol_for :pressure  ).to eq 'L⁻¹.M.T⁻²'
+      end
+    end
+
     context 'International System of Quantities' do
       before(:each) { ISQ.load! }
 

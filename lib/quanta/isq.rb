@@ -5,25 +5,30 @@ module Quanta
     @quantities = {}
     attr_accessor :label, :name, :quantities
 
+    def base_quantities
+      quantities.select{ |_, qty| qty.base? }
+    end
+
     def add label, qtys, options = {}
       # ensure each qty in qtys exists in quantities
       qtys.map{ |qty,_| quantities.fetch(qty) } if qtys
       @quantities[label] = Quantity.new label, qtys, options
     end
 
+    def quantity_for qty
+      quantities[qty] ||
+      quantities.values.find{ |q| q.label       == qty.to_sym ||
+                                  q.name.upcase == qty.upcase    } or
+      raise TypeError, "unknown quantity '#{qty}'"
+    end
+
+    def symbol_for qty
+      symbol_power_hash = Hash[quantity_for(qty).dimensions.map{|q,p| [ quantity_for(q).symbol, p ] }]
+      symbol_power_hash.map{ |sym, pow| [sym, pow == 1 ? '' : pow.to_superscript].join }.sort.join '.'
+    end
+
     def configure(&block)
       instance_eval(&block) if block
-    end
-
-    def quantity_for quantity
-      quantities[quantity] ||
-      quantities.values.find{ |q| q.label       == quantity.to_sym ||
-                                  q.name.upcase == quantity.upcase    } or
-      raise TypeError, "unknown quantity '#{quantity}'"
-    end
-
-    def base_quantities
-      quantities.select{ |_, quantity| quantity.base? }
     end
 
     def respond_to? method, include_private = false
