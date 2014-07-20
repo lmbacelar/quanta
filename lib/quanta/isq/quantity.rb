@@ -19,13 +19,7 @@ module Quanta
       end
 
       def to_s
-        #
-        # TODO: link to ISQ to extract each quantity's symbol
-        #
-        return symbol if base?
-        dimensions.map do |quantity, index|
-          index == 1 ? quantity.symbol : "#{quantity.symbol}^#{index}"
-        end.join ' . '
+        base? ? symbol : ISQ.symbol_for(label)
       end
 
       def base?

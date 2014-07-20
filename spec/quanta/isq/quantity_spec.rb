@@ -1,4 +1,5 @@
 require_relative '../examples/quantities'
+require_relative '../../../lib/quanta/isq'
 
 module Quanta::ISQ
   describe Quantity do
@@ -43,16 +44,18 @@ module Quanta::ISQ
       end
 
       context 'Output' do
-        xit 'converts itself to String for one dimension' do
+        before(:all) { Quanta::ISQ.load! }
+
+        it 'converts itself to String for one dimension' do
           expect(length.to_s).to eq 'L'
         end
 
-        xit 'converts itself to String for two equal dimensions' do
-          expect(area.to_s).to eq 'L^2'
+        it 'converts itself to String for two equal dimensions' do
+          expect(area.to_s).to eq 'L²'
         end
 
-        xit 'converts itself to String for two different dimensions' do
-          expect(velocity.to_s).to eq 'L . T^-1'
+        it 'converts itself to String for two different dimensions' do
+          expect(velocity.to_s).to eq 'L.T⁻¹'
         end
       end
 
